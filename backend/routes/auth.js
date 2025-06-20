@@ -5,6 +5,16 @@ const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
 
+// @route   POST /auth/register
+// @desc    Register new user
+// @access  Public
+router.post('/register', authController.register);
+
+// @route   POST /auth/login
+// @desc    Login user
+// @access  Public
+router.post('/login', authController.login);
+
 // @route   GET /auth/google
 // @desc    Initiate Google OAuth
 // @access  Public

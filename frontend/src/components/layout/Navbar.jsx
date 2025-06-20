@@ -4,7 +4,7 @@ import Button from "../common/Button";
 import { useAuth } from "../../lib/hooks/useAuth";
 
 export default function Navbar() {
-  const { user, authenticated, loading, login, logout } = useAuth();
+  const { user, authenticated, loading, loginWithGoogle, logout } = useAuth();
 
   return (
     <nav className="bg-gray-900 text-gray-100 px-6 py-3 flex items-center justify-between w-full fixed top-0 left-0 z-50 shadow">
@@ -44,18 +44,13 @@ export default function Navbar() {
             >
               Logout
             </Button>
-          </>
-        ) : (
+          </>        ) : (
           <>
-            <Button
-              variant="primary"
-              className="text-sm"
-              onClick={() => login()}
-            >
-              Login
-            </Button>
-            <Button href="/auth/login" variant="outline" className="text-sm">
+            <Button href="/auth/login" variant="primary" className="text-sm">
               Sign In
+            </Button>
+            <Button href="/auth/register" variant="outline" className="text-sm">
+              Register
             </Button>
           </>
         )}

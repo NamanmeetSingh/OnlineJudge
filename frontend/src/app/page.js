@@ -7,7 +7,7 @@ import Button from '@/components/common/Button';
 import { useAuth } from '@/lib/hooks/useAuth'
 
 const page = () => {
-  const { authenticated, user, login } = useAuth();
+  const { authenticated, user, loginWithGoogle } = useAuth();
 
   return (
     <>
@@ -37,12 +37,27 @@ const page = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                <Button 
-                  onClick={() => login()}
-                  className="bg-red-600 hover:bg-red-700 text-white px-8 py-3"
-                >
-                  Sign in with Google to Get Started
-                </Button>
+                <div className="flex justify-center gap-4">
+                  <Button 
+                    onClick={() => loginWithGoogle()}
+                    className="bg-red-600 hover:bg-red-700 text-white px-8 py-3"
+                  >
+                    Sign in with Google
+                  </Button>
+                  <Button 
+                    href="/auth/login"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
+                  >
+                    Sign In
+                  </Button>
+                  <Button 
+                    href="/auth/register"
+                    variant="outline"
+                    className="px-8 py-3"
+                  >
+                    Create Account
+                  </Button>
+                </div>
                 <p className="text-sm text-gray-500">
                   Join thousands of developers improving their coding skills
                 </p>

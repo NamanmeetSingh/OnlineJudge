@@ -34,7 +34,39 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const login = () => {
+  const register = async (userData) => {
+    try {
+      setLoading(true);
+      const response = await AuthService.register(userData);
+      if (response.success) {
+        setUser(response.user);
+        setAuthenticated(true);
+        return { success: true, message: response.message };
+      }
+    } catch (error) {
+      return { success: false, message: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = async (credentials) => {
+    try {
+      setLoading(true);
+      const response = await AuthService.login(credentials);
+      if (response.success) {
+        setUser(response.user);
+        setAuthenticated(true);
+        return { success: true, message: response.message };
+      }
+    } catch (error) {
+      return { success: false, message: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginWithGoogle = () => {
     AuthService.loginWithGoogle();
   };
 
@@ -53,7 +85,9 @@ export function AuthProvider({ children }) {
     user,
     loading,
     authenticated,
+    register,
     login,
+    loginWithGoogle,
     logout,
     handleAuthCallback,
     refreshAuth: initializeAuth
