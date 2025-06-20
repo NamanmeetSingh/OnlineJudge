@@ -1,13 +1,22 @@
 "use client";
 
-import { signIn, signOut, useSession } from "next-auth/react";
-import { Button } from "../../common/Button";
-import { Card } from "../../common/Card";
+import { useAuth } from "../../../lib/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import Button from "../../common/Button";
+import Card from "../../common/Card";
 
 export default function LoginForm() {
-  const { data: session, status } = useSession();
+  const { user, loading, authenticated, login, logout } = useAuth();
+  const router = useRouter();
 
-  if (status === "loading") {
+  useEffect(() => {
+    if (authenticated && user) {
+      router.push('/dashboard');
+    }
+  }, [authenticated, user, router]);
+
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
@@ -15,33 +24,33 @@ export default function LoginForm() {
     );
   }
 
-  if (session) {
+  if (authenticated && user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Card className="max-w-md w-full">
           <div className="text-center">
             <div className="mb-4">
-              {session.user?.image && (
+              {user?.avatar && (
                 <img
-                  src={session.user.image}
+                  src={user.avatar}
                   alt="Profile"
                   className="w-20 h-20 rounded-full mx-auto mb-4"
                 />
               )}
               <h2 className="text-2xl font-bold text-gray-900">
-                Welcome, {session.user?.name}!
+                Welcome, {user?.name}!
               </h2>
-              <p className="text-gray-600 mt-2">{session.user?.email}</p>
+              <p className="text-gray-600 mt-2">{user?.email}</p>
             </div>
             <div className="space-y-4">
               <Button
-                onClick={() => window.location.href = '/dashboard'}
+                onClick={() => router.push('/dashboard')}
                 className="w-full bg-blue-600 hover:bg-blue-700"
               >
                 Go to Dashboard
               </Button>
               <Button
-                onClick={() => signOut()}
+                onClick={logout}
                 variant="outline"
                 className="w-full"
               >
@@ -67,7 +76,7 @@ export default function LoginForm() {
           
           <div className="space-y-4">
             <Button
-              onClick={() => signIn('google')}
+              onClick={login}
               className="w-full bg-red-600 hover:bg-red-700 flex items-center justify-center gap-3"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">

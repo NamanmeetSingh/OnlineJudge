@@ -3,8 +3,8 @@
 import React from 'react'
 import Footer from '@/components/layout/Footer'
 import Navbar from '@/components/layout/Navbar'
+import Button from '@/components/common/Button';
 import { useAuth } from '@/lib/hooks/useAuth'
-import { Button } from '@/components/common/Button'
 
 const page = () => {
   const { authenticated, user, login } = useAuth();
