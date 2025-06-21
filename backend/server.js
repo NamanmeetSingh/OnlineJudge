@@ -28,6 +28,8 @@ connectDB();
 
 // Importing routes
 const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
+const problemRoutes = require('./routes/problems');
 
 // Middleware
 app.use(cors({
@@ -54,6 +56,8 @@ app.use(passport.session());
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
+app.use('/api/problems', problemRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

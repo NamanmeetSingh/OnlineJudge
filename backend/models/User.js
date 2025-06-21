@@ -46,15 +46,21 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['user', 'admin'],
     default: 'user'
-  },
-  submissions: [{
+  },  submissions: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Submission'
+    ref: 'Submission',
+    index: true
   }],
   solvedProblems: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Problem'
+    ref: 'Problem',
+    index: true
   }],
+  progress: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'UserProgress',
+    index: true
+  },
   lastLogin: {
     type: Date
   }
