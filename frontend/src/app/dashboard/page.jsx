@@ -13,9 +13,8 @@ export default function DashboardPage() {
 
 function DashboardContent() {
   const { user } = useAuth();
-
   return (
-    <div className="min-h-screen bg-gray-50 pt-16">
+    <div className="bg-gray-50">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="border-4 border-dashed border-gray-200 rounded-lg p-8">
