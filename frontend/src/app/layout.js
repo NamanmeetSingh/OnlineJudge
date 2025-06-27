@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "../lib/hooks/useAuth";
+import { Toaster } from "@/components/ui/sonner";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 
@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Online Judge",
-  description: "Created by Namanmeet Singh",
+  title: "CodeMaster - Online Judge Platform",
+  description: "Master coding with interactive challenges and comprehensive problem-solving platform",
 };
 
 export default function RootLayout({ children }) {
@@ -25,13 +25,10 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <Navbar />
-          <main className="min-h-screen pt-16">
-            {children}
-          </main>
-          <Footer />
-        </AuthProvider>
+        <Navbar />
+        {children}
+        <Footer />
+        <Toaster />
       </body>
     </html>
   );
