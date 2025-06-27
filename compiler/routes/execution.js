@@ -33,8 +33,6 @@ const router = express.Router();
 router.post('/run', validateCodeExecution, asyncHandler(async (req, res) => {
   const { code, language, stdin, timeoutMs } = req.body;
   
-  console.log(`🏃 Executing ${language} code (Run mode)`);
-  
   // Initialize code runner
   const runner = new CodeRunner();
   
@@ -45,9 +43,6 @@ router.post('/run', validateCodeExecution, asyncHandler(async (req, res) => {
   const startTime = Date.now();
   const result = await runner.runCode(code, language.toLowerCase(), stdin || '', timeout);
   const totalTime = Date.now() - startTime;
-  
-  // Log execution result
-  console.log(`✅ Execution completed in ${totalTime}ms - Status: ${result.status}`);
   
   // Return execution results
   res.json({
@@ -80,11 +75,7 @@ router.post('/run', validateCodeExecution, asyncHandler(async (req, res) => {
  */
 router.post('/submit', validateTestCases, asyncHandler(async (req, res) => {
   const { code, language, testCases, problemId, stopOnFirstFailure = true } = req.body;
-  
-  console.log(`🎯 Submitting ${language} code against ${testCases.length} test cases`);
-  if (problemId) console.log(`📝 Problem ID: ${problemId}`);
-  
-  // Initialize code runner
+    // Initialize code runner
   const runner = new CodeRunner();
   
   // Configure runner for submit mode
@@ -94,10 +85,6 @@ router.post('/submit', validateTestCases, asyncHandler(async (req, res) => {
   const startTime = Date.now();
   const result = await runner.runTests(code, language.toLowerCase(), testCases);
   const totalTime = Date.now() - startTime;
-  
-  // Log submission result
-  console.log(`🏆 Submission completed in ${totalTime}ms - Verdict: ${result.status}`);
-  console.log(`📊 Passed: ${result.passedTests}/${result.totalTests} test cases`);
   
   // Prepare detailed response
   const response = {

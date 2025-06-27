@@ -1,11 +1,4 @@
 /**
- * Async Handler Middleware
- * 
- * Wraps async route handlers to automatically catch errors
- * and pass them to the error handling middleware
- */
-
-/**
  * Async handler wrapper
  * @param {Function} fn - Async route handler function
  * @returns {Function} Express middleware function

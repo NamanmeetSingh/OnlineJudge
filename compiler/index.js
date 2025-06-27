@@ -66,6 +66,9 @@ class CodeRunner {
     this.ensureTempDirectory();
   }
 
+  /**
+   * Ensures that the temporary directory exists for storing code files
+   */
   async ensureTempDirectory() {
     try {
       await fs.access(this.tempDir);
@@ -74,20 +77,37 @@ class CodeRunner {
     }
   }
 
+  /**
+   * Generates a unique filename for temporary code files
+   * @param {string} extension - File extension for the language
+   * @returns {string} Unique filename with path
+   */
   generateTempFilename(extension) {
     const uniqueId = uuidv4();
     return path.join(this.tempDir, `code_${uniqueId}${extension}`);
   }
-
+  /**
+   * Writes the source code to a temporary file
+   * @param {string} code - Source code to write
+   * @param {string} filename - Path where to write the file
+   */
   async writeCodeToFile(code, filename) {
+    // Ensure directory exists before writing file
     const dir = path.dirname(filename);
     await fs.mkdir(dir, { recursive: true });
     await fs.writeFile(filename, code, 'utf8');
   }
 
+  /**
+   * Compiles the source code if compilation is needed for the language
+   * @param {string} sourceFile - Path to the source file
+   * @param {string} language - Programming language
+   * @returns {Object} Compilation result with status and details
+   */
   async compileCode(sourceFile, language) {
     const config = LANGUAGE_CONFIG[language];
     
+    // If language doesn't need compilation, return success
     if (!config.needsCompilation) {
       return {
         success: true,
@@ -97,14 +117,17 @@ class CodeRunner {
       };
     }
 
+    // Generate executable path (remove extension and add .exe for Windows)
     const executablePath = sourceFile.replace(path.extname(sourceFile), '') + 
                           (process.platform === 'win32' ? '.exe' : '');
 
+    // Prepare compilation command and arguments
     const compileArgs = [...config.compileArgs, executablePath, sourceFile];
 
     return new Promise((resolve) => {
       const startTime = Date.now();
       
+      // Spawn the compilation process
       const compileProcess = spawn(config.compileCommand, compileArgs, {
         stdio: ['pipe', 'pipe', 'pipe']
       });
@@ -112,14 +135,17 @@ class CodeRunner {
       let stdout = '';
       let stderr = '';
 
+      // Capture stdout from compilation
       compileProcess.stdout.on('data', (data) => {
         stdout += data.toString();
       });
 
+      // Capture stderr from compilation (usually contains error messages)
       compileProcess.stderr.on('data', (data) => {
         stderr += data.toString();
       });
 
+      // Handle compilation completion
       compileProcess.on('close', (code) => {
         const compilationTime = Date.now() - startTime;
         
@@ -147,6 +173,14 @@ class CodeRunner {
     });
   }
 
+  /**
+   * Executes the compiled code or interprets the source code
+   * @param {string} executablePath - Path to executable or source file
+   * @param {string} language - Programming language
+   * @param {string} stdin - Input to provide to the program
+   * @param {number} timeoutMs - Timeout in milliseconds
+   * @returns {Object} Execution result with output and timing information
+   */
   async executeCode(executablePath, language, stdin = '', timeoutMs = 5000) {
     const config = LANGUAGE_CONFIG[language];
     
@@ -166,6 +200,7 @@ class CodeRunner {
       const startTime = Date.now();
       let isTimedOut = false;
       
+      // Spawn the execution process
       const executeProcess = spawn(command, args, {
         stdio: ['pipe', 'pipe', 'pipe']
       });
@@ -247,19 +282,28 @@ class CodeRunner {
     });
   }
 
-  async cleanupFiles(filePaths) {
-    const deletePromises = filePaths.map(async (filePath) => {
+  /**
+   * Cleans up temporary files created during compilation and execution
+   * @param {Array<string>} filePaths - Array of file paths to delete
+   */
+  async cleanupFiles(filePaths) {    const deletePromises = filePaths.map(async (filePath) => {
       try {
         await fs.unlink(filePath);
       } catch (error) {
         // Ignore errors if file doesn't exist or can't be deleted
-        console.warn(`Warning: Could not delete file ${filePath}:`, error.message);
       }
     });
 
     await Promise.allSettled(deletePromises);
   }
 
+  /**
+   * Main method to run code - handles the complete pipeline from source to result
+   * @param {string} code - Source code to execute
+   * @param {string} language - Programming language (c, cpp, python, javascript)
+   * @param {string} stdin - Input to provide to the program (optional)
+   * @returns {Object} Complete execution result
+   */
   async runCode(code, language, stdin = '') {
     // Validate language support
     if (!LANGUAGE_CONFIG[language]) {
@@ -333,6 +377,13 @@ class CodeRunner {
     }
   }
 
+  /**
+   * Runs code against multiple test cases (for submit functionality)
+   * @param {string} code - Source code to test
+   * @param {string} language - Programming language
+   * @param {Array} testCases - Array of test case objects with input and expectedOutput
+   * @returns {Object} Results for all test cases with overall verdict
+   */
   async runTests(code, language, testCases) {
     const results = [];
     let overallStatus = EXECUTION_STATUS.ACCEPTED;

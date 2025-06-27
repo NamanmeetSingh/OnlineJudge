@@ -49,9 +49,7 @@ router.post('/run', auth, async (req, res) => {
         message: getStatusMessage(result.status)
       }
     });
-
   } catch (error) {
-    console.error('Error in /run endpoint:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -153,9 +151,7 @@ router.post('/submit', auth, async (req, res) => {
         details: process.env.NODE_ENV === 'development' ? result.results : undefined
       }
     });
-
   } catch (error) {
-    console.error('Error in /submit endpoint:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -201,9 +197,7 @@ router.get('/submission/:submissionId', auth, async (req, res) => {
         message: getStatusMessage(submission.status)
       }
     });
-
   } catch (error) {
-    console.error('Error in /submission/:submissionId endpoint:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error'
@@ -253,9 +247,7 @@ router.get('/submissions/:problemId', auth, async (req, res) => {
         }
       }
     });
-
   } catch (error) {
-    console.error('Error in /submissions/:problemId endpoint:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error'

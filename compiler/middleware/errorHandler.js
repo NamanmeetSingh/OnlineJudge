@@ -1,10 +1,4 @@
 /**
- * Error Handling Middleware
- * 
- * Centralized error handling for the code execution server
- */
-
-/**
  * Custom error class for application-specific errors
  */
 class AppError extends Error {
@@ -59,17 +53,6 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'ValidationError') {
     const message = Object.values(err.errors).map(val => val.message).join(', ');
     error = new AppError(message, 400, 'VALIDATION_ERROR');
-  }
-
-  // JWT errors
-  if (err.name === 'JsonWebTokenError') {
-    const message = 'Invalid token';
-    error = new AppError(message, 401, 'INVALID_TOKEN');
-  }
-
-  if (err.name === 'TokenExpiredError') {
-    const message = 'Token expired';
-    error = new AppError(message, 401, 'TOKEN_EXPIRED');
   }
 
   // Code execution timeout

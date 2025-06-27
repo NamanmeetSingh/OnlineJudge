@@ -1,13 +1,6 @@
 const { LANGUAGE_CONFIG } = require('../core/codeRunner');
 
 /**
- * Validation Middleware
- * 
- * Contains validation functions for request data to ensure
- * proper input format and security constraints
- */
-
-/**
  * Validate code execution request (for /run endpoint)
  */
 const validateCodeExecution = (req, res, next) => {
