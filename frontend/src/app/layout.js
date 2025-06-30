@@ -3,6 +3,8 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
+import ClientOnly from "../components/ClientOnly";
+import { AuthProvider } from "../lib/hooks/useAuth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,10 +27,14 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar />
-        {children}
-        <Footer />
-        <Toaster />
+        <ClientOnly fallback={<div className="min-h-screen" />}>
+          <AuthProvider>
+            <Navbar />
+            {children}
+            <Footer />
+            <Toaster />
+          </AuthProvider>
+        </ClientOnly>
       </body>
     </html>
   );

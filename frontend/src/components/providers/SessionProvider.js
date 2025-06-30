@@ -1,11 +1,11 @@
 "use client";
 
-import { SessionProvider as NextAuthSessionProvider } from "next-auth/react";
+import { AuthProvider } from '../../lib/hooks/useAuth';
 
 export function SessionProvider({ children }) {
   return (
-    <NextAuthSessionProvider>
+    <AuthProvider>
       {children}
-    </NextAuthSessionProvider>
+    </AuthProvider>
   );
 }

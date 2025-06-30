@@ -1,5 +1,8 @@
 const { generateToken } = require('../config/jwt');
 const User = require('../models/User');
+const UserProgress = require('../models/UserProgress');
+const Submission = require('../models/Submission');
+const Problem = require('../models/Problem');
 
 const authController = {
   // Register new user
@@ -187,6 +190,116 @@ const authController = {
         success: false,
         valid: false,
         message: 'Invalid token'
+      });
+    }
+  },
+
+  // Get user dashboard data
+  getDashboard: async (req, res) => {
+    try {
+      const userId = req.user._id;
+
+      // Get user data
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      // Get or create user progress
+      let progress = await UserProgress.findOne({ userId });
+      if (!progress) {
+        progress = new UserProgress({ userId });
+        await progress.save();
+      }
+
+      // Get total problems count
+      const totalProblems = await Problem.countDocuments({ isActive: true });
+
+      // Get recent submissions
+      const recentSubmissions = await Submission.find({ user: userId })
+        .populate('problem', 'title difficulty')
+        .sort({ createdAt: -1 })
+        .limit(10);
+
+      // Calculate current streak (days with at least one accepted submission)
+      const acceptedSubmissions = await Submission.find({ 
+        user: userId, 
+        status: 'Accepted' 
+      }).sort({ createdAt: -1 });
+
+      let currentStreak = 0;
+      if (acceptedSubmissions.length > 0) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const submissionDates = new Set();
+        acceptedSubmissions.forEach(sub => {
+          const date = new Date(sub.createdAt);
+          date.setHours(0, 0, 0, 0);
+          submissionDates.add(date.getTime());
+        });
+
+        const sortedDates = Array.from(submissionDates).sort((a, b) => b - a);
+        
+        let checkDate = today.getTime();
+        for (const dateTime of sortedDates) {
+          if (dateTime === checkDate) {
+            currentStreak++;
+            checkDate -= 24 * 60 * 60 * 1000; // Previous day
+          } else if (dateTime < checkDate) {
+            break;
+          }
+        }
+      }
+
+      // Get unique solved problems count
+      const uniqueSolvedProblems = await Submission.distinct('problem', {
+        user: userId,
+        status: 'Accepted'
+      });
+
+      // Prepare dashboard data
+      const dashboardData = {
+        user: {
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          role: user.role
+        },
+        stats: {
+          problemsSolved: uniqueSolvedProblems.length,
+          totalProblems,
+          streak: currentStreak,
+          points: progress.totalXP,
+          rank: progress.globalRank || 0,
+          level: progress.level,
+          contests: progress.contestsStats ? progress.contestsStats.participated : 0
+        },
+        recentSubmissions: recentSubmissions.map(sub => ({
+          id: sub._id,
+          problem: sub.problem ? sub.problem.title : 'Unknown Problem',
+          status: sub.status.toLowerCase(),
+          time: sub.createdAt,
+          difficulty: sub.problem ? sub.problem.difficulty : 'Unknown',
+          language: sub.language,
+          runtime: sub.runtime
+        })),
+        achievements: progress.achievements || []
+      };
+
+      res.json({
+        success: true,
+        data: dashboardData
+      });
+
+    } catch (error) {
+      console.error('Dashboard error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error'
       });
     }
   }

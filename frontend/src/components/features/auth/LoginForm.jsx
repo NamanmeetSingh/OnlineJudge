@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, Code, Mail, Lock, Chrome } from "lucide-react"
 import { toast } from "sonner"
+import { authApi } from "@/lib/api/auth"
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -28,34 +29,32 @@ export default function LoginForm() {
       [e.target.name]: e.target.value
     })
   }
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
 
     try {
-      // Mock login process
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await authApi.login(formData)
       
-      // Simulate API call
-      if (formData.email === "demo@example.com" && formData.password === "password") {
-        localStorage.setItem('token', 'demo-token')
+      if (response.data?.success) {
         toast.success("Login successful!")
         router.push('/dashboard')
       } else {
-        setError("Invalid email or password")
+        setError(response.data?.message || "Login failed")
       }
     } catch (err) {
-      setError("An error occurred. Please try again.")
+      const errorMessage = err.response?.data?.message || "An error occurred. Please try again."
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
   }
-
   const handleGoogleLogin = () => {
-    // Implement Google OAuth login
-    toast.info("Google login coming soon!")
+    // Redirect to backend Google OAuth
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    window.location.href = `${backendUrl}/auth/google`;
   }
 
   return (
@@ -174,19 +173,6 @@ export default function LoginForm() {
               <Link href="/auth/register" className="text-primary hover:underline">
                 Sign up
               </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Demo credentials */}
-        <Card className="mt-4">
-          <CardContent className="pt-6">
-            <div className="text-center text-sm">
-              <p className="text-muted-foreground mb-2">Demo credentials:</p>
-              <p className="font-mono text-xs bg-muted p-2 rounded">
-                Email: demo@example.com<br />
-                Password: password
-              </p>
             </div>
           </CardContent>
         </Card>

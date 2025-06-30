@@ -515,6 +515,114 @@ class AdminController {
       });
     }
   }
+
+  // Create a simple test problem (for development only)
+  static async createTestProblem(req, res) {
+    try {
+      // Check if test problem already exists
+      const existingProblem = await Problem.findOne({ slug: 'hello-world' });
+      if (existingProblem) {
+        return res.json({
+          success: true,
+          message: 'Test problem already exists',
+          data: { problem: existingProblem }
+        });
+      }
+
+      // Create test cases
+      const testCase1 = new TestCase({
+        input: '',
+        expectedOutput: 'Hello, World!',
+        isHidden: false
+      });
+      await testCase1.save();
+
+      const testCase2 = new TestCase({
+        input: '',
+        expectedOutput: 'Hello, World!',
+        isHidden: true
+      });
+      await testCase2.save();
+
+      // Create the problem
+      const problem = new Problem({
+        title: 'Hello World',
+        slug: 'hello-world',
+        difficulty: 'Easy',
+        description: `Write a program that outputs "Hello, World!" to the console.
+
+**Example:**
+Output: Hello, World!
+
+This is a simple problem to test the system.`,
+        constraints: ['No specific constraints'],
+        tags: ['Basic', 'Output'],
+        points: 10,
+        timeLimit: 1000,
+        memoryLimit: 256,
+        isActive: true,
+        testCases: [testCase1._id, testCase2._id],
+        createdBy: req.user._id
+      });
+
+      await problem.save();
+
+      res.json({
+        success: true,
+        message: 'Test problem created successfully',
+        data: { problem }
+      });
+    } catch (error) {
+      console.error('Create test problem error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create test problem'
+      });
+    }
+  }
+
+  // Create admin user for testing (development only)
+  static async createTestAdmin(req, res) {
+    try {
+      // Check if admin already exists
+      const existingAdmin = await User.findOne({ email: 'admin@test.com' });
+      if (existingAdmin) {
+        return res.json({
+          success: true,
+          message: 'Test admin already exists',
+          data: { user: existingAdmin }
+        });
+      }
+
+      // Create admin user
+      const admin = await User.create({
+        name: 'Test Admin',
+        email: 'admin@test.com',
+        password: 'admin123',
+        role: 'admin',
+        provider: 'local',
+        isEmailVerified: true
+      });
+
+      res.json({
+        success: true,
+        message: 'Test admin created successfully',
+        data: { 
+          user: admin,
+          credentials: {
+            email: 'admin@test.com',
+            password: 'admin123'
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Create test admin error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create test admin'
+      });
+    }
+  }
 }
 
 module.exports = AdminController;

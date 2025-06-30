@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, Code, Mail, Lock, User, Chrome } from "lucide-react"
 import { toast } from "sonner"
+import { authApi } from "@/lib/api/auth"
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -56,24 +57,31 @@ export default function RegisterForm() {
       setError("Please accept the terms and conditions")
       setIsLoading(false)
       return
-    }
-
-    try {
-      // Mock registration process
-      await new Promise(resolve => setTimeout(resolve, 1000))
+    }    try {
+      const response = await authApi.register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
+      });
       
-      // Simulate API call
-      toast.success("Account created successfully!")
-      router.push('/auth/login')
+      if (response.data?.success) {
+        toast.success("Account created successfully!")
+        router.push('/auth/login')
+      } else {
+        setError(response.data?.message || "Registration failed")
+      }
     } catch (err) {
-      setError("An error occurred. Please try again.")
+      const errorMessage = err.response?.data?.message || "An error occurred. Please try again."
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
   }
-
   const handleGoogleSignUp = () => {
-    toast.info("Google sign up coming soon!")
+    // Redirect to backend Google OAuth
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    window.location.href = `${backendUrl}/auth/google`;
   }
 
   return (

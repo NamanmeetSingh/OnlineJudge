@@ -92,13 +92,18 @@ class ProblemController {
       });
     }
   }
-
   // Get visible test cases for a problem
   static async getVisibleTestCases(req, res) {
     try {
       const { slug } = req.params;
 
-      const problem = await Problem.findOne({ slug, isActive: true });
+      const problem = await Problem.findOne({ slug, isActive: true })
+        .populate({
+          path: 'testCases',
+          match: { isVisible: true },
+          select: 'input expectedOutput points'
+        });
+
       if (!problem) {
         return res.status(404).json({
           success: false,
@@ -106,17 +111,11 @@ class ProblemController {
         });
       }
 
-      // Get only visible (sample) test cases
-      const testCases = await TestCase.find({
-        problemId: problem._id,
-        isHidden: false
-      }).select('input expectedOutput description');
-
       res.json({
         success: true,
         data: {
           sampleTestCases: problem.sampleTestCases,
-          additionalTestCases: testCases
+          visibleTestCases: problem.testCases.filter(tc => tc.isVisible)
         }
       });
     } catch (error) {

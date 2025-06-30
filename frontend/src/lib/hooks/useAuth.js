@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useContext, createContext } from 'react';
-import AuthService from '../api/auth';
+import { authApi } from '../api/auth';
 
 const AuthContext = createContext();
 
@@ -9,22 +9,36 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    initializeAuth();
+    setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (mounted) {
+      initializeAuth();
+    }
+  }, [mounted]);
   const initializeAuth = async () => {
     try {
-      if (AuthService.isAuthenticated()) {
-        const isValid = await AuthService.verifyToken();
-        
-        if (isValid) {
-          const userData = await AuthService.getCurrentUser();
-          setUser(userData);
-          setAuthenticated(true);
-        } else {
-          AuthService.removeToken();
+      if (mounted && authApi.isAuthenticated()) {
+        // For now, we'll just check if token exists
+        // You can add token verification endpoint later
+        const token = authApi.getToken();
+        if (token) {
+          try {
+            const userData = await authApi.getProfile();
+            setUser(userData.data?.user);
+            setAuthenticated(true);
+          } catch (error) {
+            // If profile fetch fails, remove invalid token
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('token');
+            }
+            setAuthenticated(false);
+            setUser(null);
+          }
         }
       }
     } catch (error) {
@@ -33,52 +47,61 @@ export function AuthProvider({ children }) {
       setLoading(false);
     }
   };
-
   const register = async (userData) => {
     try {
       setLoading(true);
-      const response = await AuthService.register(userData);
-      if (response.success) {
-        setUser(response.user);
+      const response = await authApi.register(userData);
+      if (response.data?.success) {
+        setUser(response.data.user);
         setAuthenticated(true);
-        return { success: true, message: response.message };
+        return { success: true, message: response.data.message };
       }
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: error.response?.data?.message || error.message };
     } finally {
       setLoading(false);
     }
   };
-
   const login = async (credentials) => {
     try {
       setLoading(true);
-      const response = await AuthService.login(credentials);
-      if (response.success) {
-        setUser(response.user);
+      const response = await authApi.login(credentials);
+      if (response.data?.success) {
+        setUser(response.data.user);
         setAuthenticated(true);
-        return { success: true, message: response.message };
+        return { success: true, message: response.data.message };
       }
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: error.response?.data?.message || error.message };
     } finally {
       setLoading(false);
     }
   };
 
   const loginWithGoogle = () => {
-    AuthService.loginWithGoogle();
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    window.location.href = `${backendUrl}/auth/google`;
   };
 
   const logout = async () => {
-    await AuthService.logout();
+    await authApi.logout();
     setUser(null);
     setAuthenticated(false);
   };
 
-  const handleAuthCallback = (token) => {
-    AuthService.setToken(token);
-    initializeAuth();
+  const handleAuthCallback = async (token) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('token', token);
+      setAuthenticated(true);
+      try {
+        // Fetch user profile after setting token
+        const userData = await authApi.getProfile();
+        setUser(userData.data?.user);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+      setLoading(false);
+    }
   };
 
   const value = {
@@ -102,7 +125,21 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
+    // During SSR or before AuthProvider is mounted, return a safe default
+    if (typeof window === 'undefined') {
+      return {
+        user: null,
+        loading: true,
+        authenticated: false,
+        register: () => Promise.resolve({ success: false, message: 'Auth not available' }),
+        login: () => Promise.resolve({ success: false, message: 'Auth not available' }),
+        loginWithGoogle: () => {},
+        logout: () => Promise.resolve(),
+        handleAuthCallback: () => {},
+        refreshAuth: () => Promise.resolve()
+      };
+    }
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

@@ -30,10 +30,17 @@ export default function Navbar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState(null)
   const [isOpen, setIsOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
 
-  // Simulate user authentication check
+  // Prevent hydration mismatch by only checking auth after component mounts
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+    
     // This would typically check JWT token or session
     const checkAuth = () => {
       const token = localStorage.getItem('token')
@@ -49,9 +56,10 @@ export default function Navbar() {
       }
     }
     checkAuth()
-  }, [])
+  }, [mounted])
 
   const handleLogout = () => {
+    if (!mounted) return
     localStorage.removeItem('token')
     setIsAuthenticated(false)
     setUser(null)
@@ -110,7 +118,12 @@ export default function Navbar() {
 
           {/* Right Side */}
           <div className="flex items-center space-x-4">
-            {isAuthenticated ? (
+            {/* Prevent hydration mismatch by only showing auth UI after mount */}
+            {!mounted ? (
+              <div className="w-20 h-8" /> // Placeholder to prevent layout shift
+            ) : (
+              <>
+                {isAuthenticated ? (
               <>
                 {/* Points Badge */}
                 <Badge variant="secondary" className="hidden sm:inline-flex">
@@ -181,6 +194,8 @@ export default function Navbar() {
                   <Link href="/auth/register">Sign Up</Link>
                 </Button>
               </div>
+            )}
+              </>
             )}
 
             {/* Mobile Menu */}

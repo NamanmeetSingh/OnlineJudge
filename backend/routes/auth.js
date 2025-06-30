@@ -26,9 +26,19 @@ router.get('/google',
 // @desc    Google OAuth callback
 // @access  Public
 router.get('/google/callback',
-  passport.authenticate('google', { failureRedirect: '/auth/error' }),
+  passport.authenticate('google', { failureRedirect: '/auth/login' }),
   authController.googleCallback
 );
+
+// @route   GET /auth/error
+// @desc    Authentication error page
+// @access  Public
+router.get('/error', (req, res) => {
+  res.status(401).json({
+    success: false,
+    message: 'Authentication failed'
+  });
+});
 
 // @route   GET /auth/me
 // @desc    Get current user
@@ -44,5 +54,10 @@ router.post('/logout', authMiddleware, authController.logout);
 // @desc    Verify token
 // @access  Private
 router.get('/verify', authMiddleware, authController.verifyToken);
+
+// @route   GET /auth/dashboard
+// @desc    Get user dashboard data
+// @access  Private
+router.get('/dashboard', authMiddleware, authController.getDashboard);
 
 module.exports = router;

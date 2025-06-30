@@ -51,8 +51,7 @@ export default function AdminDashboard() {
     totalUsers: 1250,
     activeUsers: 892,
     totalProblems: 150,
-    totalSubmissions: 15670,
-    systemHealth: 99.9
+    totalSubmissions: 15670
   })
 
   // User Management Functions
@@ -269,13 +268,10 @@ export default function AdminDashboard() {
           </h1>
           <p className="text-muted-foreground">Manage users, problems, and system settings</p>
         </div>
-        <Badge variant="secondary" className="text-green-600">
-          System Health: {stats.systemHealth}%
-        </Badge>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -314,19 +310,6 @@ export default function AdminDashboard() {
             </p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">System Health</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.systemHealth}%</div>
-            <p className="text-xs text-muted-foreground">
-              All systems operational
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Management Tabs */}
@@ -339,7 +322,7 @@ export default function AdminDashboard() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Recent User Activity</CardTitle>
@@ -357,28 +340,6 @@ export default function AdminDashboard() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Problems solved today</span>
                     <span className="font-semibold">892</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>System Status</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">API Response Time</span>
-                    <Badge variant="secondary">120ms</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Database Health</span>
-                    <Badge className="bg-green-100 text-green-800">Excellent</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Server Uptime</span>
-                    <Badge variant="secondary">99.9%</Badge>
                   </div>
                 </div>
               </CardContent>
