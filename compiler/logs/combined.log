@@ -1,0 +1,43 @@
+{"level":"info","message":"🚀 Compiler service running on port 5001","service":"compiler-service","timestamp":"2025-07-15T18:17:28.436Z"}
+{"level":"info","message":"📊 Environment: development","service":"compiler-service","timestamp":"2025-07-15T18:17:28.442Z"}
+{"level":"info","message":"🐳 Docker timeout: 30000ms","service":"compiler-service","timestamp":"2025-07-15T18:17:28.443Z"}
+{"level":"info","message":"💾 Memory limit: 128m","service":"compiler-service","timestamp":"2025-07-15T18:17:28.444Z"}
+{"level":"info","message":"🚀 Compiler service running on port 5001","service":"compiler-service","timestamp":"2025-07-15T18:20:10.730Z"}
+{"level":"info","message":"📊 Environment: development","service":"compiler-service","timestamp":"2025-07-15T18:20:10.737Z"}
+{"level":"info","message":"🐳 Docker timeout: 30000ms","service":"compiler-service","timestamp":"2025-07-15T18:20:10.738Z"}
+{"level":"info","message":"💾 Memory limit: 128m","service":"compiler-service","timestamp":"2025-07-15T18:20:10.739Z"}
+{"level":"info","message":"🚀 Compiler service running on port 5001","service":"compiler-service","timestamp":"2025-07-15T18:29:34.582Z"}
+{"level":"info","message":"📊 Environment: development","service":"compiler-service","timestamp":"2025-07-15T18:29:34.589Z"}
+{"level":"info","message":"🐳 Docker timeout: 30000ms","service":"compiler-service","timestamp":"2025-07-15T18:29:34.590Z"}
+{"level":"info","message":"💾 Memory limit: 128m","service":"compiler-service","timestamp":"2025-07-15T18:29:34.591Z"}
+{"level":"info","message":"🚀 Compiler service running on port 5001","service":"compiler-service","timestamp":"2025-07-15T18:31:50.927Z"}
+{"level":"info","message":"📊 Environment: development","service":"compiler-service","timestamp":"2025-07-15T18:31:50.932Z"}
+{"level":"info","message":"🐳 Docker timeout: 30000ms","service":"compiler-service","timestamp":"2025-07-15T18:31:50.933Z"}
+{"level":"info","message":"💾 Memory limit: 128m","service":"compiler-service","timestamp":"2025-07-15T18:31:50.934Z"}
+{"ip":"::1","level":"info","message":"GET /api/compiler/languages","service":"compiler-service","timestamp":"2025-07-15T18:32:22.121Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"GET /api/compiler/languages","service":"compiler-service","timestamp":"2025-07-15T18:32:22.144Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"GET /api/compiler/languages","service":"compiler-service","timestamp":"2025-07-15T18:32:45.954Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"GET /api/compiler/languages","service":"compiler-service","timestamp":"2025-07-15T18:32:45.965Z","userAgent":"axios/1.10.0"}
+{"level":"info","message":"SIGINT received, shutting down gracefully","service":"compiler-service","timestamp":"2025-07-15T18:36:21.800Z"}
+{"level":"info","message":"🚀 Compiler service running on port 5001","service":"compiler-service","timestamp":"2025-07-15T18:46:03.176Z"}
+{"level":"info","message":"📊 Environment: development","service":"compiler-service","timestamp":"2025-07-15T18:46:03.180Z"}
+{"level":"info","message":"🐳 Docker timeout: 30000ms","service":"compiler-service","timestamp":"2025-07-15T18:46:03.181Z"}
+{"level":"info","message":"💾 Memory limit: 128m","service":"compiler-service","timestamp":"2025-07-15T18:46:03.182Z"}
+{"ip":"::1","level":"info","message":"GET /api/compiler/languages","service":"compiler-service","timestamp":"2025-07-15T18:46:08.758Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"GET /api/compiler/languages","service":"compiler-service","timestamp":"2025-07-15T18:46:08.772Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"GET /api/compiler/languages","service":"compiler-service","timestamp":"2025-07-15T18:46:15.372Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"GET /api/compiler/languages","service":"compiler-service","timestamp":"2025-07-15T18:46:15.380Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"POST /api/compiler/execute","service":"compiler-service","timestamp":"2025-07-15T18:46:16.683Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"POST /api/compiler/execute","service":"compiler-service","timestamp":"2025-07-15T18:46:23.747Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"POST /api/compiler/execute","service":"compiler-service","timestamp":"2025-07-15T18:46:29.172Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"POST /api/compiler/execute","service":"compiler-service","timestamp":"2025-07-15T18:46:38.773Z","userAgent":"axios/1.10.0"}
+{"level":"info","message":"🚀 Compiler service running on port 5001","service":"compiler-service","timestamp":"2025-07-15T18:50:24.737Z"}
+{"level":"info","message":"📊 Environment: development","service":"compiler-service","timestamp":"2025-07-15T18:50:24.742Z"}
+{"level":"info","message":"🐳 Docker timeout: 30000ms","service":"compiler-service","timestamp":"2025-07-15T18:50:24.743Z"}
+{"level":"info","message":"💾 Memory limit: 128m","service":"compiler-service","timestamp":"2025-07-15T18:50:24.743Z"}
+{"ip":"::1","level":"info","message":"GET /api/compiler/languages","service":"compiler-service","timestamp":"2025-07-15T18:51:08.271Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"GET /api/compiler/languages","service":"compiler-service","timestamp":"2025-07-15T18:51:08.284Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"POST /api/compiler/execute","service":"compiler-service","timestamp":"2025-07-15T18:51:19.045Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"POST /api/compiler/execute","service":"compiler-service","timestamp":"2025-07-15T18:51:27.729Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"POST /api/compiler/execute","service":"compiler-service","timestamp":"2025-07-15T18:51:36.954Z","userAgent":"axios/1.10.0"}
+{"ip":"::1","level":"info","message":"POST /api/compiler/execute","service":"compiler-service","timestamp":"2025-07-15T18:52:56.165Z","userAgent":"axios/1.10.0"}
