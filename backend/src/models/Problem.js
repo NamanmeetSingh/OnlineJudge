@@ -104,12 +104,35 @@ const problemSchema = new mongoose.Schema({
       c: String
     }
   },
-  starterCode: {
-    javascript: String,
-    python: String,
-    cpp: String,
-    java: String,
-    c: String
+  functionSignature: {
+    python: {
+      className: String,
+      functionName: String,
+      parameters: [String],
+      returnType: String
+    },
+    javascript: {
+      functionName: String,
+      parameters: [String],
+      returnType: String
+    },
+    java: {
+      className: String,
+      functionName: String,
+      parameters: [String],
+      returnType: String
+    },
+    cpp: {
+      className: String,
+      functionName: String,
+      parameters: [String],
+      returnType: String
+    },
+    c: {
+      functionName: String,
+      parameters: [String],
+      returnType: String
+    }
   },
   totalSubmissions: {
     type: Number,

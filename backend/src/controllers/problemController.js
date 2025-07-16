@@ -78,6 +78,12 @@ const getProblems = async (req, res) => {
 
     console.log(`Found ${problems.length} problems out of ${totalCount} total`);
 
+    // Transform _id to id for frontend compatibility
+    const transformedProblems = problems.map(problem => ({
+      ...problem,
+      id: problem._id.toString()
+    }));
+
     // Calculate pagination info
     const totalPages = Math.ceil(totalCount / limitNum);
     const hasNextPage = page < totalPages;
@@ -86,7 +92,7 @@ const getProblems = async (req, res) => {
     res.json({
       success: true,
       data: {
-        problems,
+        problems: transformedProblems,
         pagination: {
           currentPage: parseInt(page),
           totalPages,
@@ -129,6 +135,11 @@ const getProblemById = async (req, res) => {
         success: false,
         message: 'Problem not found'
       });
+    }
+
+    // Transform _id to id for frontend compatibility
+    if (problem._id) {
+      problem.id = problem._id.toString();
     }
 
     // Don't include test cases for security

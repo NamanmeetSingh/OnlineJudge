@@ -3,10 +3,12 @@ const fs = require('fs-extra');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const winston = require('winston');
+const FunctionWrapperService = require('./FunctionWrapperService');
 
 class SimpleCompilerService {
   constructor() {
     this.tempDir = path.join(__dirname, '..', '..', 'temp');
+    this.functionWrapper = new FunctionWrapperService();
     this.executionStats = {
       totalExecutions: 0,
       successfulExecutions: 0,
@@ -297,6 +299,161 @@ class SimpleCompilerService {
         timestamp: new Date().toISOString()
       };
     }
+  }
+
+  /**
+   * Submit solution using function-based approach (LeetCode style)
+   * @param {Object} params - Parameters object
+   * @param {string} params.code - User's function code
+   * @param {string} params.language - Programming language
+   * @param {string} params.problemId - Problem identifier
+   * @param {Array} params.testCases - Array of test cases
+   * @param {number} params.timeLimit - Time limit in seconds
+   * @returns {Object} Submission results
+   */
+  async submitFunctionSolution({ code, language, problemId, testCases, timeLimit = 10 }) {
+    const submissionId = uuidv4();
+    
+    try {
+      this.logger.info(`Starting function-based solution submission: ${submissionId}`, {
+        problemId,
+        language,
+        testCasesCount: testCases.length
+      });
+
+      // Extract function template from user code
+      const functionTemplate = this.functionWrapper.extractFunctionTemplate(code, language);
+      
+      // Wrap user function with test execution logic
+      const wrappedCode = this.functionWrapper.wrapFunctionWithTests({
+        code,
+        language,
+        testCases,
+        functionTemplate
+      });
+
+      // Execute the wrapped code
+      const execution = await this.executeCode({
+        code: wrappedCode,
+        language,
+        input: '',
+        timeLimit
+      });
+
+      // Parse test results from output
+      const results = this.parseTestResults(execution, testCases, submissionId, problemId, language);
+      
+      return results;
+
+    } catch (error) {
+      this.logger.error(`Function-based solution submission failed: ${submissionId}`, {
+        error: error.message,
+        problemId
+      });
+
+      return {
+        submissionId,
+        problemId,
+        language,
+        status: 'error',
+        overallResult: 'compilation_error',
+        error: error.message,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Parse test results from wrapped function execution output
+   */
+  parseTestResults(execution, testCases, submissionId, problemId, language) {
+    const results = {
+      submissionId,
+      problemId,
+      language,
+      status: 'completed',
+      totalTestCases: testCases.length,
+      passedTestCases: 0,
+      failedTestCases: 0,
+      testCaseResults: [],
+      overallResult: 'pending',
+      executionTime: execution.executionTime || 0,
+      memoryUsed: 0,
+      timestamp: new Date().toISOString()
+    };
+
+    if (execution.status === 'error') {
+      results.status = 'error';
+      results.overallResult = 'runtime_error';
+      results.error = execution.error;
+      return results;
+    }
+
+    const output = execution.output || '';
+    const lines = output.split('\n');
+    
+    // Look for TEST_RESULTS line
+    const testResultsLine = lines.find(line => line.startsWith('TEST_RESULTS:'));
+    if (testResultsLine) {
+      const match = testResultsLine.match(/TEST_RESULTS:\s*(\d+)\/(\d+)/);
+      if (match) {
+        results.passedTestCases = parseInt(match[1]);
+        results.totalTestCases = parseInt(match[2]);
+        results.failedTestCases = results.totalTestCases - results.passedTestCases;
+      }
+    }
+
+    // Parse individual test results
+    let currentTestCase = null;
+    const testCaseResults = [];
+    
+    for (const line of lines) {
+      const testMatch = line.match(/Test (\d+): (PASS|FAIL)/);
+      if (testMatch) {
+        if (currentTestCase) {
+          testCaseResults.push(currentTestCase);
+        }
+        
+        const testNum = parseInt(testMatch[1]);
+        const status = testMatch[2] === 'PASS' ? 'passed' : 'failed';
+        
+        currentTestCase = {
+          testCaseNumber: testNum,
+          status,
+          input: testCases[testNum - 1]?.input || '',
+          expectedOutput: testCases[testNum - 1]?.expectedOutput || '',
+          actualOutput: '',
+          executionTime: 0,
+          memoryUsed: 0,
+          passed: status === 'passed'
+        };
+      } else if (currentTestCase && line.trim().startsWith('Input:')) {
+        currentTestCase.input = line.replace('Input:', '').trim();
+      } else if (currentTestCase && line.trim().startsWith('Expected:')) {
+        currentTestCase.expectedOutput = line.replace('Expected:', '').trim();
+      } else if (currentTestCase && line.trim().startsWith('Actual:')) {
+        currentTestCase.actualOutput = line.replace('Actual:', '').trim();
+      } else if (currentTestCase && line.trim().startsWith('Error:')) {
+        currentTestCase.error = line.replace('Error:', '').trim();
+      }
+    }
+    
+    if (currentTestCase) {
+      testCaseResults.push(currentTestCase);
+    }
+
+    results.testCaseResults = testCaseResults;
+
+    // Determine overall result
+    if (results.passedTestCases === results.totalTestCases) {
+      results.overallResult = 'accepted';
+    } else if (results.failedTestCases > 0) {
+      results.overallResult = 'wrong_answer';
+    } else {
+      results.overallResult = 'runtime_error';
+    }
+
+    return results;
   }
 
   buildRunArgs(language, fileName, execDir) {

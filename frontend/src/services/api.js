@@ -303,6 +303,27 @@ class ApiService {
     return this.handleResponse(response);
   }
 
+  // Function-based execution (LeetCode style)
+  async executeFunctionCode(codeData) {
+    const response = await fetch(`${API_BASE_URL}/compiler/execute-function`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(codeData),
+    });
+    
+    return this.handleResponse(response);
+  }
+
+  async submitFunctionSolution(submissionData) {
+    const response = await fetch(`${API_BASE_URL}/compiler/submit-function`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(submissionData),
+    });
+    
+    return this.handleResponse(response);
+  }
+
   async getSubmissionDetails(submissionId) {
     const response = await fetch(`${API_BASE_URL}/compiler/submission/${submissionId}`, {
       method: 'GET',

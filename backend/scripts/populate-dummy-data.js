@@ -108,12 +108,12 @@ const dummyProblems = [
     slug: 'hello-world',
     difficulty: 'Easy',
     category: 'Getting Started',
-    description: 'Write a program that outputs "Hello World" exactly as shown.',
+    description: 'Write a function that returns the string "Hello World".',
     examples: [
       {
         input: '',
         output: 'Hello World',
-        explanation: 'Simply output the string "Hello World".'
+        explanation: 'Simply return the string "Hello World".'
       }
     ],
     constraints: 'No input is required. Output must be exactly "Hello World".',
@@ -128,11 +128,41 @@ const dummyProblems = [
       }
     ],
     starterCode: {
-      cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello World" << endl;\n    return 0;\n}',
-      java: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello World");\n    }\n}',
-      python: 'print("Hello World")',
-      javascript: 'console.log("Hello World");',
-      c: '#include <stdio.h>\n\nint main() {\n    printf("Hello World\\n");\n    return 0;\n}'
+      python: 'class Solution:\n    def helloWorld(self) -> str:\n        # Write your code here\n        pass',
+      javascript: 'var helloWorld = function() {\n    // Write your code here\n    \n};',
+      java: 'class Solution {\n    public String helloWorld() {\n        // Write your code here\n        \n    }\n}',
+      cpp: 'class Solution {\npublic:\n    string helloWorld() {\n        // Write your code here\n        \n    }\n};',
+      c: 'char* helloWorld() {\n    // Write your code here\n    \n}'
+    },
+    functionSignature: {
+      python: {
+        className: 'Solution',
+        functionName: 'helloWorld',
+        parameters: [],
+        returnType: 'str'
+      },
+      javascript: {
+        functionName: 'helloWorld',
+        parameters: [],
+        returnType: 'string'
+      },
+      java: {
+        className: 'Solution',
+        functionName: 'helloWorld',
+        parameters: [],
+        returnType: 'String'
+      },
+      cpp: {
+        className: 'Solution',
+        functionName: 'helloWorld',
+        parameters: [],
+        returnType: 'string'
+      },
+      c: {
+        functionName: 'helloWorld',
+        parameters: [],
+        returnType: 'char*'
+      }
     }
   },
   {
@@ -140,12 +170,17 @@ const dummyProblems = [
     slug: 'two-sum',
     difficulty: 'Easy',
     category: 'Array',
-    description: 'Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.',
+    description: 'Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.',
     examples: [
       {
-        input: 'nums = [2,7,11,15], target = 9',
+        input: '[2,7,11,15]\n9',
         output: '[0,1]',
         explanation: 'Because nums[0] + nums[1] == 9, we return [0, 1].'
+      },
+      {
+        input: '[3,2,4]\n6',
+        output: '[1,2]',
+        explanation: 'Because nums[1] + nums[2] == 6, we return [1, 2].'
       }
     ],
     constraints: '2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9\nOnly one valid answer exists.',
@@ -154,25 +189,57 @@ const dummyProblems = [
     acceptedSubmissions: 1245,
     testCases: [
       {
-        input: '4\n2 7 11 15\n9',
-        expectedOutput: '0 1',
+        input: '[2,7,11,15]\n9',
+        expectedOutput: '[0,1]',
         isHidden: false
       },
       {
-        input: '3\n3 2 4\n6',
-        expectedOutput: '1 2',
+        input: '[3,2,4]\n6',
+        expectedOutput: '[1,2]',
         isHidden: false
       },
       {
-        input: '2\n3 3\n6',
-        expectedOutput: '0 1',
+        input: '[3,3]\n6',
+        expectedOutput: '[0,1]',
         isHidden: true
       }
     ],
     starterCode: {
-      cpp: '#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> nums(n);\n    for(int i = 0; i < n; i++) {\n        cin >> nums[i];\n    }\n    int target;\n    cin >> target;\n    \n    // Your solution here\n    // Print the indices separated by space\n    \n    return 0;\n}',
-      java: 'import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] nums = new int[n];\n        for(int i = 0; i < n; i++) {\n            nums[i] = sc.nextInt();\n        }\n        int target = sc.nextInt();\n        \n        // Your solution here\n        // Print the indices separated by space\n        \n        sc.close();\n    }\n}',
-      python: 'n = int(input())\nnums = list(map(int, input().split()))\ntarget = int(input())\n\n# Your solution here\n# Print the indices separated by space\n'
+      cpp: 'class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        // Write your code here\n        \n    }\n};',
+      java: 'class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        // Write your code here\n        \n    }\n}',
+      python: 'class Solution:\n    def twoSum(self, nums: List[int], target: int) -> List[int]:\n        # Write your code here\n        pass',
+      javascript: 'var twoSum = function(nums, target) {\n    // Write your code here\n    \n};',
+      c: '#include <stdio.h>\n#include <stdlib.h>\n\nint* twoSum(int* nums, int numsSize, int target, int* returnSize) {\n    // Write your code here\n    \n}'
+    },
+    functionSignature: {
+      python: {
+        className: 'Solution',
+        functionName: 'twoSum',
+        parameters: ['nums: List[int]', 'target: int'],
+        returnType: 'List[int]'
+      },
+      javascript: {
+        functionName: 'twoSum',
+        parameters: ['nums', 'target'],
+        returnType: 'number[]'
+      },
+      java: {
+        className: 'Solution',
+        functionName: 'twoSum',
+        parameters: ['int[] nums', 'int target'],
+        returnType: 'int[]'
+      },
+      cpp: {
+        className: 'Solution',
+        functionName: 'twoSum',
+        parameters: ['vector<int>& nums', 'int target'],
+        returnType: 'vector<int>'
+      },
+      c: {
+        functionName: 'twoSum',
+        parameters: ['int* nums', 'int numsSize', 'int target', 'int* returnSize'],
+        returnType: 'int*'
+      }
     }
   },
   {
@@ -311,6 +378,83 @@ const dummyProblems = [
       cpp: 'class Solution {\npublic:\n    bool isValid(string s) {\n        \n    }\n};',
       java: 'class Solution {\n    public boolean isValid(String s) {\n        \n    }\n}',
       python: 'class Solution:\n    def isValid(self, s: str) -> bool:\n        '
+    }
+  },
+  {
+    title: 'Add Two Integers',
+    slug: 'add-two-integers',
+    difficulty: 'Easy',
+    category: 'Math',
+    description: 'Given two integers a and b, return their sum.',
+    examples: [
+      {
+        input: '2\n3',
+        output: '5',
+        explanation: '2 + 3 = 5'
+      },
+      {
+        input: '-1\n1',
+        output: '0',
+        explanation: '-1 + 1 = 0'
+      }
+    ],
+    constraints: '-10^9 <= a, b <= 10^9',
+    tags: ['math', 'basic'],
+    totalSubmissions: 3000,
+    acceptedSubmissions: 2850,
+    testCases: [
+      {
+        input: '2\n3',
+        expectedOutput: '5',
+        isHidden: false
+      },
+      {
+        input: '-1\n1',
+        expectedOutput: '0',
+        isHidden: false
+      },
+      {
+        input: '100\n200',
+        expectedOutput: '300',
+        isHidden: true
+      }
+    ],
+    starterCode: {
+      python: 'class Solution:\n    def addTwoIntegers(self, a: int, b: int) -> int:\n        # Write your code here\n        pass',
+      javascript: 'var addTwoIntegers = function(a, b) {\n    // Write your code here\n    \n};',
+      java: 'class Solution {\n    public int addTwoIntegers(int a, int b) {\n        // Write your code here\n        \n    }\n}',
+      cpp: 'class Solution {\npublic:\n    int addTwoIntegers(int a, int b) {\n        // Write your code here\n        \n    }\n};',
+      c: 'int addTwoIntegers(int a, int b) {\n    // Write your code here\n    \n}'
+    },
+    functionSignature: {
+      python: {
+        className: 'Solution',
+        functionName: 'addTwoIntegers',
+        parameters: ['a: int', 'b: int'],
+        returnType: 'int'
+      },
+      javascript: {
+        functionName: 'addTwoIntegers',
+        parameters: ['a', 'b'],
+        returnType: 'number'
+      },
+      java: {
+        className: 'Solution',
+        functionName: 'addTwoIntegers',
+        parameters: ['int a', 'int b'],
+        returnType: 'int'
+      },
+      cpp: {
+        className: 'Solution',
+        functionName: 'addTwoIntegers',
+        parameters: ['int a', 'int b'],
+        returnType: 'int'
+      },
+      c: {
+        functionName: 'addTwoIntegers',
+        parameters: ['int a', 'int b'],
+        returnType: 'int'
+      }
     }
   }
 ];

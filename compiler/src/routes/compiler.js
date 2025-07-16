@@ -75,6 +75,81 @@ router.post('/submit', async (req, res) => {
   }
 });
 
+// Submit function-based solution (LeetCode style)
+router.post('/submit-function', async (req, res) => {
+  try {
+    const { code, language, problemId, testCases, timeLimit = 10 } = req.body;
+
+    // Basic validation
+    if (!code || !language || !problemId || !testCases) {
+      return res.status(400).json({
+        success: false,
+        message: 'Code, language, problemId, and testCases are required'
+      });
+    }
+
+    const result = await compilerService.submitFunctionSolution({
+      code,
+      language,
+      problemId,
+      testCases,
+      timeLimit
+    });
+
+    res.json({
+      success: true,
+      data: result
+    });
+
+  } catch (error) {
+    console.error('Function-based solution submission error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Function-based solution submission failed',
+      error: error.message
+    });
+  }
+});
+
+// Execute function with sample test (for testing)
+router.post('/execute-function', async (req, res) => {
+  try {
+    const { code, language, testCases, timeLimit = 10 } = req.body;
+
+    // Basic validation
+    if (!code || !language) {
+      return res.status(400).json({
+        success: false,
+        message: 'Code and language are required'
+      });
+    }
+
+    // Use only first test case for quick testing
+    const sampleTestCases = testCases ? testCases.slice(0, 1) : [];
+    
+    const result = await compilerService.submitFunctionSolution({
+      code,
+      language,
+      problemId: 'sample',
+      testCases: sampleTestCases,
+      timeLimit
+    });
+
+    res.json({
+      success: true,
+      data: result
+    });
+
+  } catch (error) {
+    console.error('Function execution error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Function execution failed',
+      error: error.message
+    });
+  }
+});
+
 // Get supported languages
 router.get('/languages', (req, res) => {
   const languages = compilerService.getSupportedLanguages();

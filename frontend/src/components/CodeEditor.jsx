@@ -28,6 +28,7 @@ const CodeEditor = ({ problem }) => {
   const [aiResponse, setAiResponse] = useState('');
   const [customInput, setCustomInput] = useState('');
   const [supportedLanguages, setSupportedLanguages] = useState({});
+  const [executionMode, setExecutionMode] = useState('function'); // 'function' or 'raw'
 
   // Load supported languages on component mount
   useEffect(() => {
@@ -160,65 +161,117 @@ const CodeEditor = ({ problem }) => {
     setOutput('Running code...');
 
     try {
-      // If custom input is provided, use it. Otherwise use problem's sample test cases
-      const inputToUse = customInput || (problem?.examples?.[0]?.input || '');
+      let response;
       
-      const response = await ApiService.executeCode({
-        code,
-        language: selectedLanguage,
-        input: inputToUse,
-        timeLimit: 10
-      });
-
-      if (response.success) {
-        const result = response.data;
-        let outputText = '';
+      if (executionMode === 'function' && problem?.functionSignature) {
+        // Use function-based execution (LeetCode style)
+        response = await ApiService.executeFunctionCode({
+          code,
+          language: selectedLanguage,
+          problemId: problem.id,
+          timeLimit: 10
+        });
         
-        if (result.status === 'success') {
-          outputText = `✅ Execution Successful\n\n`;
+        if (response.success) {
+          const result = response.data;
+          let outputText = '';
           
-          // Show which input was used
-          if (customInput) {
-            outputText += `Custom Input:\n${customInput}\n\n`;
-          } else if (problem?.examples?.[0]?.input) {
-            outputText += `Sample Input (Example 1):\n${problem.examples[0].input}\n\n`;
-          }
-          
-          outputText += `Output:\n${result.output}\n\n`;
-          
-          // If we used sample input, show expected output for comparison
-          if (!customInput && problem?.examples?.[0]?.output) {
-            outputText += `Expected Output:\n${problem.examples[0].output}\n\n`;
+          if (result.status === 'accepted' || result.status === 'wrong_answer') {
+            outputText = `${result.overallPassed ? '✅' : '❌'} Function Test Results\n\n`;
+            outputText += `Test Cases Passed: ${result.passedCount}/${result.totalCount}\n\n`;
             
-            // Simple comparison (normalize whitespace)
-            const actualOutput = result.output.trim();
-            const expectedOutput = problem.examples[0].output.trim();
-            if (actualOutput === expectedOutput) {
-              outputText += `✅ Output matches expected result!\n\n`;
-            } else {
-              outputText += `❓ Output differs from expected result. Check your logic.\n\n`;
-            }
+            // Show individual test results
+            result.results.forEach((testResult, index) => {
+              const status = testResult.passed ? '✅ PASS' : '❌ FAIL';
+              outputText += `Test Case ${index + 1}: ${status}\n`;
+              if (!testResult.passed) {
+                outputText += `  Input: ${testResult.input}\n`;
+                outputText += `  Expected: ${testResult.expectedOutput}\n`;
+                outputText += `  Got: ${testResult.actualOutput}\n`;
+                if (testResult.error) {
+                  outputText += `  Error: ${testResult.error}\n`;
+                }
+              }
+              outputText += '\n';
+            });
+            
+            outputText += `Execution Time: ${result.executionTime}ms`;
+          } else {
+            outputText = `❌ Execution Failed\n\n`;
+            outputText += `Error: ${result.error || 'Unknown error'}\n`;
           }
           
-          outputText += `Execution Time: ${result.executionTime}ms\n`;
-          outputText += `Memory Used: ${result.memoryUsed} bytes`;
-        } else {
-          outputText = `❌ Execution Failed\n\n`;
-          outputText += `Error:\n${result.error}\n\n`;
-          if (result.output) {
-            outputText += `Output:\n${result.output}\n\n`;
+          setOutput(outputText);
+          
+          if (result.overallPassed) {
+            toast.success('All sample test cases passed!');
+          } else {
+            toast.error('Some test cases failed');
           }
-          outputText += `Execution Time: ${result.executionTime}ms`;
-        }
-        
-        setOutput(outputText);
-        
-        if (result.status === 'success') {
-          toast.success('Code executed successfully!');
-        } else {
-          toast.error('Code execution failed');
         }
       } else {
+        // Use raw execution mode
+        const inputToUse = customInput || (problem?.examples?.[0]?.input || '');
+        
+        response = await ApiService.executeCode({
+          code,
+          language: selectedLanguage,
+          input: inputToUse,
+          timeLimit: 10
+        });
+
+        if (response.success) {
+          const result = response.data;
+          let outputText = '';
+          
+          if (result.status === 'success') {
+            outputText = `✅ Execution Successful\n\n`;
+            
+            // Show which input was used
+            if (customInput) {
+              outputText += `Custom Input:\n${customInput}\n\n`;
+            } else if (problem?.examples?.[0]?.input) {
+              outputText += `Sample Input (Example 1):\n${problem.examples[0].input}\n\n`;
+            }
+            
+            outputText += `Output:\n${result.output}\n\n`;
+            
+            // If we used sample input, show expected output for comparison
+            if (!customInput && problem?.examples?.[0]?.output) {
+              outputText += `Expected Output:\n${problem.examples[0].output}\n\n`;
+              
+              // Simple comparison (normalize whitespace)
+              const actualOutput = result.output.trim();
+              const expectedOutput = problem.examples[0].output.trim();
+              if (actualOutput === expectedOutput) {
+                outputText += `✅ Output matches expected result!\n\n`;
+              } else {
+                outputText += `❓ Output differs from expected result. Check your logic.\n\n`;
+              }
+            }
+            
+            outputText += `Execution Time: ${result.executionTime}ms\n`;
+            outputText += `Memory Used: ${result.memoryUsed} bytes`;
+          } else {
+            outputText = `❌ Execution Failed\n\n`;
+            outputText += `Error:\n${result.error}\n\n`;
+            if (result.output) {
+              outputText += `Output:\n${result.output}\n\n`;
+            }
+            outputText += `Execution Time: ${result.executionTime}ms`;
+          }
+          
+          setOutput(outputText);
+          
+          if (result.status === 'success') {
+            toast.success('Code executed successfully!');
+          } else {
+            toast.error('Code execution failed');
+          }
+        }
+      }
+
+      if (!response.success) {
         throw new Error(response.message || 'Execution failed');
       }
     } catch (error) {
@@ -253,11 +306,23 @@ const CodeEditor = ({ problem }) => {
     setOutput('Submitting solution...');
 
     try {
-      const response = await ApiService.submitSolution({
-        code,
-        language: selectedLanguage,
-        problemId: problem.id
-      });
+      let response;
+      
+      if (executionMode === 'function' && problem?.functionSignature) {
+        // Use function-based submission (LeetCode style)
+        response = await ApiService.submitFunctionSolution({
+          code,
+          language: selectedLanguage,
+          problemId: problem.id
+        });
+      } else {
+        // Use raw submission mode
+        response = await ApiService.submitSolution({
+          code,
+          language: selectedLanguage,
+          problemId: problem.id
+        });
+      }
 
       if (response.success) {
         const result = response.data;
@@ -383,6 +448,20 @@ const CodeEditor = ({ problem }) => {
                   ))
               }
             </select>
+            
+            {/* Execution Mode Toggle */}
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Mode:</span>
+              <select
+                value={executionMode}
+                onChange={(e) => setExecutionMode(e.target.value)}
+                className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="function">LeetCode Style</option>
+                <option value="raw">Raw Code</option>
+              </select>
+            </div>
+
             <button
               onClick={runCode}
               disabled={isRunning}
