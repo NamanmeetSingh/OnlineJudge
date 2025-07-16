@@ -62,6 +62,7 @@ app.use('/api/submissions', require('./routes/submissionRoutes'));
 app.use('/api/contests', require('./routes/contestRoutes'));
 app.use('/api/discussions', require('./routes/discussionRoutes'));
 app.use('/api/compiler', require('./routes/compiler'));
+app.use('/api/ai', require('./routes/aiRoutes'));
 
 // Root route
 app.get('/', (req, res) => {

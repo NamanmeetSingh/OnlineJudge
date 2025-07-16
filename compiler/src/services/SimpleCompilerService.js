@@ -394,12 +394,37 @@ class SimpleCompilerService {
 
       process.on('error', (error) => {
         clearTimeout(timer);
-        resolve({
-          stdout: '',
-          stderr: error.message,
-          executionTime: Date.now() - startTime,
-          error: error.message
-        });
+        const executionTime = Date.now() - startTime;
+        
+        // Special handling for missing compilers
+        if (error.code === 'ENOENT') {
+          let errorMessage = error.message;
+          if (command.includes('g++')) {
+            errorMessage = 'C++ compiler (g++) is not installed. Please install MinGW-w64 or Visual Studio Build Tools to compile C++ code.';
+          } else if (command.includes('gcc')) {
+            errorMessage = 'C compiler (gcc) is not installed. Please install MinGW-w64 or Visual Studio Build Tools to compile C code.';
+          } else if (command.includes('javac')) {
+            errorMessage = 'Java compiler (javac) is not installed. Please install Java Development Kit (JDK).';
+          } else if (command.includes('python')) {
+            errorMessage = 'Python is not installed or not in PATH. Please install Python and add it to your system PATH.';
+          } else if (command.includes('node')) {
+            errorMessage = 'Node.js is not installed or not in PATH. Please install Node.js and add it to your system PATH.';
+          }
+          
+          resolve({
+            stdout: '',
+            stderr: errorMessage,
+            executionTime,
+            error: errorMessage
+          });
+        } else {
+          resolve({
+            stdout: '',
+            stderr: error.message,
+            executionTime,
+            error: error.message
+          });
+        }
       });
 
       // Write input if provided

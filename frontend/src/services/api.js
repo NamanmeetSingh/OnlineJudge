@@ -301,6 +301,37 @@ class ApiService {
     
     return this.handleResponse(response);
   }
+
+  // AI endpoints
+  async getAIAssistance(assistanceData) {
+    const response = await fetch(`${API_BASE_URL}/ai/assist`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(assistanceData),
+    });
+    
+    return this.handleResponse(response);
+  }
+
+  async getAISuggestions(suggestionData) {
+    const response = await fetch(`${API_BASE_URL}/ai/suggest`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(suggestionData),
+    });
+    
+    return this.handleResponse(response);
+  }
+
+  async getCodeExplanation(explanationData) {
+    const response = await fetch(`${API_BASE_URL}/ai/explain`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(explanationData),
+    });
+    
+    return this.handleResponse(response);
+  }
 }
 
 export default new ApiService();

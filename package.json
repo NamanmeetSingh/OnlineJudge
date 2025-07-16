@@ -1,0 +1,35 @@
+{
+  "name": "online-judge-platform",
+  "version": "1.0.0",
+  "description": "Full-stack online judge platform with backend, compiler service, and frontend",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:compiler\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:compiler": "cd compiler && npm run dev", 
+    "dev:frontend": "cd frontend && npm run dev",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:compiler\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "start:compiler": "cd compiler && npm start",
+    "start:frontend": "cd frontend && npm run build && npm run preview",
+    "install:all": "npm install && cd backend && npm install && cd ../compiler && npm install && cd ../frontend && npm install",
+    "clean": "rm -rf node_modules backend/node_modules compiler/node_modules frontend/node_modules",
+    "populate-db": "cd backend && node scripts/populate-dummy-data.js"
+  },
+  "keywords": [
+    "online-judge",
+    "coding-platform",
+    "compiler",
+    "react",
+    "node.js",
+    "mongodb"
+  ],
+  "author": "NamanmeetSingh",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

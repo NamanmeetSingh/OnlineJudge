@@ -1,13 +1,53 @@
-# Coding Platform - Complete Integration
+# Online Judge Platform
 
-A comprehensive coding platform with separate frontend, backend, and compiler services that work together to provide a complete online judge experience.
+A full-stack coding platform with real-time code execution, AI assistance, and competitive programming features.
 
 ## 🏗️ Architecture
 
-The platform consists of three main services:
+- **Frontend**: React + Vite + Tailwind CSS
+- **Backend**: Node.js + Express + MongoDB
+- **Compiler Service**: Node.js microservice for code execution
+- **AI Integration**: Google Gemini AI for code assistance
 
-1. **Frontend** (Port 3000) - Next.js React application
-2. **Backend** (Port 5000) - Express.js API server with MongoDB
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js (v18 or higher)
+- MongoDB (local or cloud)
+- Git
+
+### Installation & Setup
+
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd Development
+   ```
+
+2. **Install all dependencies**:
+   ```bash
+   npm run install:all
+   ```
+
+3. **Environment Setup**:
+   - Backend: Configure `backend/.env`
+   - Frontend: Configure `frontend/.env`
+   - Compiler: No additional config needed
+
+4. **Populate Database** (optional):
+   ```bash
+   npm run populate-db
+   ```
+
+5. **Start Development Servers**:
+   ```bash
+   npm run dev
+   ```
+
+This will start all three services simultaneously:
+- **Backend API**: http://localhost:5000
+- **Compiler Service**: http://localhost:5001  
+- **Frontend**: http://localhost:5173
 3. **Compiler** (Port 3001) - Code execution service
 
 ## 🚀 Quick Start

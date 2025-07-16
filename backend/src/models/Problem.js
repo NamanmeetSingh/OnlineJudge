@@ -39,7 +39,8 @@ const problemSchema = new mongoose.Schema({
       'Binary Search', 'Database', 'Breadth-First Search',
       'Tree', 'Matrix', 'Two Pointers', 'Bit Manipulation',
       'Stack', 'Design', 'Heap', 'Graph', 'Simulation',
-      'Backtracking', 'Linked List', 'Union Find', 'Sliding Window'
+      'Backtracking', 'Linked List', 'Union Find', 'Sliding Window',
+      'Getting Started'
     ]
   },
   constraints: {
@@ -49,7 +50,7 @@ const problemSchema = new mongoose.Schema({
   examples: [{
     input: {
       type: String,
-      required: true
+      default: ''
     },
     output: {
       type: String,
@@ -62,7 +63,7 @@ const problemSchema = new mongoose.Schema({
   testCases: [{
     input: {
       type: String,
-      required: true
+      default: ''
     },
     expectedOutput: {
       type: String,

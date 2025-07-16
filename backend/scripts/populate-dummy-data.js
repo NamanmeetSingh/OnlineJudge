@@ -104,6 +104,38 @@ const dummyUsers = [
 // Dummy problems data
 const dummyProblems = [
   {
+    title: 'Hello World',
+    slug: 'hello-world',
+    difficulty: 'Easy',
+    category: 'Getting Started',
+    description: 'Write a program that outputs "Hello World" exactly as shown.',
+    examples: [
+      {
+        input: '',
+        output: 'Hello World',
+        explanation: 'Simply output the string "Hello World".'
+      }
+    ],
+    constraints: 'No input is required. Output must be exactly "Hello World".',
+    tags: ['basic', 'output'],
+    totalSubmissions: 5000,
+    acceptedSubmissions: 4800,
+    testCases: [
+      {
+        input: '',
+        expectedOutput: 'Hello World',
+        isHidden: false
+      }
+    ],
+    starterCode: {
+      cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello World" << endl;\n    return 0;\n}',
+      java: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello World");\n    }\n}',
+      python: 'print("Hello World")',
+      javascript: 'console.log("Hello World");',
+      c: '#include <stdio.h>\n\nint main() {\n    printf("Hello World\\n");\n    return 0;\n}'
+    }
+  },
+  {
     title: 'Two Sum',
     slug: 'two-sum',
     difficulty: 'Easy',
@@ -120,10 +152,27 @@ const dummyProblems = [
     tags: ['array', 'hash table'],
     totalSubmissions: 2890,
     acceptedSubmissions: 1245,
+    testCases: [
+      {
+        input: '4\n2 7 11 15\n9',
+        expectedOutput: '0 1',
+        isHidden: false
+      },
+      {
+        input: '3\n3 2 4\n6',
+        expectedOutput: '1 2',
+        isHidden: false
+      },
+      {
+        input: '2\n3 3\n6',
+        expectedOutput: '0 1',
+        isHidden: true
+      }
+    ],
     starterCode: {
-      cpp: 'class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        \n    }\n};',
-      java: 'class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        \n    }\n}',
-      python: 'class Solution:\n    def twoSum(self, nums: List[int], target: int) -> List[int]:\n        '
+      cpp: '#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> nums(n);\n    for(int i = 0; i < n; i++) {\n        cin >> nums[i];\n    }\n    int target;\n    cin >> target;\n    \n    // Your solution here\n    // Print the indices separated by space\n    \n    return 0;\n}',
+      java: 'import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] nums = new int[n];\n        for(int i = 0; i < n; i++) {\n            nums[i] = sc.nextInt();\n        }\n        int target = sc.nextInt();\n        \n        // Your solution here\n        // Print the indices separated by space\n        \n        sc.close();\n    }\n}',
+      python: 'n = int(input())\nnums = list(map(int, input().split()))\ntarget = int(input())\n\n# Your solution here\n# Print the indices separated by space\n'
     }
   },
   {
@@ -143,6 +192,23 @@ const dummyProblems = [
     tags: ['linked list', 'math'],
     totalSubmissions: 2345,
     acceptedSubmissions: 890,
+    testCases: [
+      {
+        input: '2 4 3\n5 6 4',
+        expectedOutput: '7 0 8',
+        isHidden: false
+      },
+      {
+        input: '0\n0',
+        expectedOutput: '0',
+        isHidden: false
+      },
+      {
+        input: '9 9 9 9 9 9 9\n9 9 9 9',
+        expectedOutput: '8 9 9 9 0 0 0 1',
+        isHidden: true
+      }
+    ],
     starterCode: {
       cpp: 'struct ListNode {\n    int val;\n    ListNode *next;\n    ListNode() : val(0), next(nullptr) {}\n    ListNode(int x) : val(x), next(nullptr) {}\n    ListNode(int x, ListNode *next) : val(x), next(next) {}\n};\n\nclass Solution {\npublic:\n    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n        \n    }\n};',
       java: 'class ListNode {\n    int val;\n    ListNode next;\n    ListNode() {}\n    ListNode(int val) { this.val = val; }\n    ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n}\n\npublic class Solution {\n    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {\n        \n    }\n}',
@@ -171,6 +237,23 @@ const dummyProblems = [
     tags: ['hash table', 'string', 'sliding window'],
     totalSubmissions: 1890,
     acceptedSubmissions: 678,
+    testCases: [
+      {
+        input: 'abcabcbb',
+        expectedOutput: '3',
+        isHidden: false
+      },
+      {
+        input: 'bbbbb',
+        expectedOutput: '1',
+        isHidden: false
+      },
+      {
+        input: 'pwwkew',
+        expectedOutput: '3',
+        isHidden: true
+      }
+    ],
     starterCode: {
       cpp: 'class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        \n    }\n};',
       java: 'class Solution {\n    public int lengthOfLongestSubstring(String s) {\n        \n    }\n}',

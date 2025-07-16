@@ -77,6 +77,23 @@ const CodeEditor = ({ problem }) => {
     loadSupportedLanguages();
   }, []);
 
+  // Update code when problem changes
+  useEffect(() => {
+    if (problem && Object.keys(supportedLanguages).length > 0) {
+      let starterCode = '';
+      if (problem.starterCode && problem.starterCode[selectedLanguage]) {
+        starterCode = problem.starterCode[selectedLanguage];
+      } else {
+        const langConfig = supportedLanguages[selectedLanguage] || {
+          name: selectedLanguage,
+          defaultCode: getDefaultCode(selectedLanguage)
+        };
+        starterCode = langConfig.defaultCode;
+      }
+      setCode(starterCode);
+    }
+  }, [problem, selectedLanguage, supportedLanguages]);
+
   const getDefaultCode = (language) => {
     const defaultCodes = {
       python: `def solution():\n    # Write your code here\n    pass\n\n# Test your solution\nif __name__ == "__main__":\n    result = solution()\n    print(result)`,
@@ -91,20 +108,38 @@ const CodeEditor = ({ problem }) => {
 
   const handleLanguageChange = (lang) => {
     setSelectedLanguage(lang);
-    const langConfig = supportedLanguages[lang] || {
-      name: lang,
-      defaultCode: getDefaultCode(lang)
-    };
-    setCode(langConfig.defaultCode);
+    
+    // Use problem's starter code if available, otherwise use default
+    let starterCode = '';
+    if (problem?.starterCode && problem.starterCode[lang]) {
+      starterCode = problem.starterCode[lang];
+    } else {
+      const langConfig = supportedLanguages[lang] || {
+        name: lang,
+        defaultCode: getDefaultCode(lang)
+      };
+      starterCode = langConfig.defaultCode;
+    }
+    
+    setCode(starterCode);
   };
 
   const handleEditorDidMount = (editor) => {
     editorRef.current = editor;
-    const langConfig = supportedLanguages[selectedLanguage] || {
-      name: selectedLanguage,
-      defaultCode: getDefaultCode(selectedLanguage)
-    };
-    setCode(langConfig.defaultCode);
+    
+    // Use problem's starter code if available, otherwise use default
+    let starterCode = '';
+    if (problem?.starterCode && problem.starterCode[selectedLanguage]) {
+      starterCode = problem.starterCode[selectedLanguage];
+    } else {
+      const langConfig = supportedLanguages[selectedLanguage] || {
+        name: selectedLanguage,
+        defaultCode: getDefaultCode(selectedLanguage)
+      };
+      starterCode = langConfig.defaultCode;
+    }
+    
+    setCode(starterCode);
   };
 
   const runCode = async () => {
@@ -125,10 +160,13 @@ const CodeEditor = ({ problem }) => {
     setOutput('Running code...');
 
     try {
+      // If custom input is provided, use it. Otherwise use problem's sample test cases
+      const inputToUse = customInput || (problem?.examples?.[0]?.input || '');
+      
       const response = await ApiService.executeCode({
         code,
         language: selectedLanguage,
-        input: customInput,
+        input: inputToUse,
         timeLimit: 10
       });
 
@@ -138,7 +176,30 @@ const CodeEditor = ({ problem }) => {
         
         if (result.status === 'success') {
           outputText = `✅ Execution Successful\n\n`;
+          
+          // Show which input was used
+          if (customInput) {
+            outputText += `Custom Input:\n${customInput}\n\n`;
+          } else if (problem?.examples?.[0]?.input) {
+            outputText += `Sample Input (Example 1):\n${problem.examples[0].input}\n\n`;
+          }
+          
           outputText += `Output:\n${result.output}\n\n`;
+          
+          // If we used sample input, show expected output for comparison
+          if (!customInput && problem?.examples?.[0]?.output) {
+            outputText += `Expected Output:\n${problem.examples[0].output}\n\n`;
+            
+            // Simple comparison (normalize whitespace)
+            const actualOutput = result.output.trim();
+            const expectedOutput = problem.examples[0].output.trim();
+            if (actualOutput === expectedOutput) {
+              outputText += `✅ Output matches expected result!\n\n`;
+            } else {
+              outputText += `❓ Output differs from expected result. Check your logic.\n\n`;
+            }
+          }
+          
           outputText += `Execution Time: ${result.executionTime}ms\n`;
           outputText += `Memory Used: ${result.memoryUsed} bytes`;
         } else {
@@ -265,33 +326,34 @@ const CodeEditor = ({ problem }) => {
   };
 
   const getAIAssistance = async () => {
+    if (!user) {
+      toast.error('Please login to use AI assistance');
+      return;
+    }
+
     setShowAIAssistant(true);
-    setAiResponse('Analyzing your code...');
+    setAiResponse('🤖 Analyzing your code with Gemini AI...');
 
-    // Simulate AI response
-    setTimeout(() => {
-      const mockResponse = `Here's my analysis of your code:
+    try {
+      const response = await ApiService.getAIAssistance({
+        code: code || 'No code provided',
+        language: selectedLanguage,
+        problem: problem,
+        question: 'Please analyze my code and provide suggestions for improvement.'
+      });
 
-**Code Structure:**
-Your solution looks good overall! I can see you're using a standard approach.
-
-**Potential Issues:**
-1. Consider edge cases like empty arrays
-2. Check for integer overflow in your calculations
-3. Your time complexity could be optimized from O(n²) to O(n log n)
-
-**Suggestions:**
-- Use a hash map for faster lookups
-- Consider sorting the input first
-- Add null/undefined checks
-
-**Example Optimization:**
-Instead of nested loops, try using a two-pointer technique or binary search.
-
-Would you like me to explain any specific part of the algorithm?`;
-      
-      setAiResponse(mockResponse);
-    }, 2000);
+      if (response.success) {
+        setAiResponse(response.data.analysis);
+        toast.success('AI analysis completed!');
+      } else {
+        throw new Error(response.message || 'AI assistance failed');
+      }
+    } catch (error) {
+      console.error('AI assistance error:', error);
+      const errorMessage = `❌ AI Analysis Failed\n\n${error.message || 'Unable to connect to AI service'}\n\nPlease try again later or check your internet connection.`;
+      setAiResponse(errorMessage);
+      toast.error('AI assistance failed');
+    }
   };
 
   return (
@@ -387,8 +449,7 @@ Would you like me to explain any specific part of the algorithm?`;
 
                 <div className="text-gray-700 dark:text-gray-300 space-y-4">
                   <p>
-                    Given an array of integers <code>nums</code> and an integer <code>target</code>, 
-                    return indices of the two numbers such that they add up to <code>target</code>.
+                    {problem?.description || 'Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.'}
                   </p>
                   
                   <p>
@@ -397,31 +458,44 @@ Would you like me to explain any specific part of the algorithm?`;
                   
                   <p>You can return the answer in any order.</p>
 
-                  <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                    <h4 className="font-semibold mb-2">Example 1:</h4>
-                    <pre className="text-sm">
+                  {problem?.examples?.map((example, idx) => (
+                    <div key={idx} className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                      <h4 className="font-semibold mb-2">Example {idx + 1}:</h4>
+                      <pre className="text-sm">
+{`Input: ${example.input}
+Output: ${example.output}${example.explanation ? `
+Explanation: ${example.explanation}` : ''}`}
+                      </pre>
+                    </div>
+                  )) || (
+                    <>
+                      <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                        <h4 className="font-semibold mb-2">Example 1:</h4>
+                        <pre className="text-sm">
 {`Input: nums = [2,7,11,15], target = 9
 Output: [0,1]
 Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].`}
-                    </pre>
-                  </div>
+                        </pre>
+                      </div>
 
-                  <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                    <h4 className="font-semibold mb-2">Example 2:</h4>
-                    <pre className="text-sm">
+                      <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                        <h4 className="font-semibold mb-2">Example 2:</h4>
+                        <pre className="text-sm">
 {`Input: nums = [3,2,4], target = 6
 Output: [1,2]`}
-                    </pre>
-                  </div>
+                        </pre>
+                      </div>
+                    </>
+                  )}
 
                   <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
                     <h4 className="font-semibold mb-2">Constraints:</h4>
-                    <ul className="list-disc list-inside text-sm space-y-1">
-                      <li>2 ≤ nums.length ≤ 10⁴</li>
-                      <li>-10⁹ ≤ nums[i] ≤ 10⁹</li>
-                      <li>-10⁹ ≤ target ≤ 10⁹</li>
-                      <li>Only one valid answer exists.</li>
-                    </ul>
+                    <div className="text-sm whitespace-pre-line">
+                      {problem?.constraints || `2 ≤ nums.length ≤ 10⁴
+-10⁹ ≤ nums[i] ≤ 10⁹
+-10⁹ ≤ target ≤ 10⁹
+Only one valid answer exists.`}
+                    </div>
                   </div>
                 </div>
               </div>
