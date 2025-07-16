@@ -87,6 +87,119 @@ router.post('/execute', authenticateToken, executeValidation, async (req, res) =
   }
 });
 
+// Test code against sample test cases (for testing - Enhanced Run button)
+router.post('/test-samples', authenticateToken, [
+  body('code').notEmpty().withMessage('Code is required'),
+  body('language').isIn(['javascript', 'python', 'java', 'cpp', 'c']).withMessage('Unsupported language'),
+  body('problemId').notEmpty().withMessage('Problem ID is required')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const { code, language, problemId } = req.body;
+
+    // Get problem with examples (sample test cases)
+    const problem = await Problem.findById(problemId);
+    if (!problem) {
+      return res.status(404).json({
+        success: false,
+        message: 'Problem not found'
+      });
+    }
+
+    if (!problem.examples || problem.examples.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No sample test cases available for this problem'
+      });
+    }
+
+    // Prepare sample test cases for compiler service
+    const sampleTestCases = problem.examples.map((example, index) => ({
+      input: example.input,
+      expectedOutput: example.output,
+      testCaseNumber: index + 1
+    }));
+
+    const results = [];
+    let passedCount = 0;
+
+    // Test each sample case
+    for (const testCase of sampleTestCases) {
+      try {
+        const response = await axios.post(`${COMPILER_SERVICE_URL}/api/compiler/execute`, {
+          code,
+          language,
+          input: testCase.input,
+          timeLimit: 10
+        }, {
+          timeout: 15000,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const result = response.data.data;
+        const actualOutput = result.output ? result.output.trim() : '';
+        const expectedOutput = testCase.expectedOutput ? testCase.expectedOutput.trim() : '';
+        const passed = result.status === 'success' && actualOutput === expectedOutput;
+        
+        if (passed) passedCount++;
+
+        results.push({
+          testCaseNumber: testCase.testCaseNumber,
+          input: testCase.input,
+          expectedOutput: testCase.expectedOutput,
+          actualOutput: result.output,
+          passed,
+          status: result.status,
+          error: result.error,
+          executionTime: result.executionTime,
+          memoryUsed: result.memoryUsed
+        });
+
+      } catch (error) {
+        results.push({
+          testCaseNumber: testCase.testCaseNumber,
+          input: testCase.input,
+          expectedOutput: testCase.expectedOutput,
+          actualOutput: '',
+          passed: false,
+          status: 'error',
+          error: error.response?.data?.error || error.message,
+          executionTime: 0,
+          memoryUsed: 0
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      data: {
+        overallPassed: passedCount === sampleTestCases.length,
+        passedCount,
+        totalCount: sampleTestCases.length,
+        results
+      }
+    });
+
+  } catch (error) {
+    console.error('Sample test execution error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to test sample cases',
+      error: error.message
+    });
+  }
+});
+
 // Submit solution (for evaluation - Submit button)
 router.post('/submit', authenticateToken, submitValidation, async (req, res) => {
   try {

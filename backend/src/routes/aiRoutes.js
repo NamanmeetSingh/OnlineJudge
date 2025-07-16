@@ -87,7 +87,7 @@ Please provide a helpful analysis that includes:
 Please be constructive and educational in your response. If the code has issues, explain why and suggest fixes. If it's working well, suggest optimizations or alternative approaches.`;
 
     // Get response from Gemini
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const aiResponse = response.text();
@@ -158,7 +158,7 @@ Please provide:
 
 Keep suggestions practical and actionable. Format code snippets clearly.`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const suggestions = response.text();
@@ -212,7 +212,7 @@ Provide:
 
 Keep the explanation beginner-friendly but technically accurate.`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const explanation = response.text();

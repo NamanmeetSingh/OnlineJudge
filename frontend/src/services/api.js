@@ -264,6 +264,16 @@ class ApiService {
     return this.handleResponse(response);
   }
 
+  async testSampleCases(testData) {
+    const response = await fetch(`${API_BASE_URL}/compiler/test-samples`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(testData),
+    });
+    
+    return this.handleResponse(response);
+  }
+
   async submitSolution(submissionData) {
     const response = await fetch(`${API_BASE_URL}/compiler/submit`, {
       method: 'POST',
