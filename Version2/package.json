@@ -1,0 +1,10 @@
+{
+  "name": "namancode-arena",
+  "version": "1.0.0",
+  "description": "NamanCode Arena - AI-powered coding platform by NamanmeetSingh",
+  "author": "Namanmeet Singh",
+  "dependencies": {
+    "date-fns": "^3.6.0",
+    "git-filter-repo": "^0.0.30"
+  }
+}
