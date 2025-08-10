@@ -124,8 +124,14 @@ router.post('/execute-function', async (req, res) => {
       });
     }
 
-    // Use only first test case for quick testing
-    const sampleTestCases = testCases ? testCases.slice(0, 1) : [];
+    // Create sample test cases if none provided
+    let sampleTestCases = testCases;
+    if (!sampleTestCases || sampleTestCases.length === 0) {
+      sampleTestCases = [{
+        input: '1\n2\n3',
+        expectedOutput: '6'
+      }];
+    }
     
     const result = await compilerService.submitFunctionSolution({
       code,

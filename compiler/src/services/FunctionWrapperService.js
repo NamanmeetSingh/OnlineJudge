@@ -40,15 +40,13 @@ import json
 import sys
 from typing import List
 
+# User's solution code - they only write this part
 ${userCode}
 
-# Test case execution
+# Test case execution - hidden from user
 def run_tests():
-    test_cases = ${JSON.stringify(testCases)}
+    test_cases = ${JSON.stringify(testCases).replace(/"/g, '\\"')}
     results = []
-    
-    # Create solution instance
-    solution = Solution()
     
     for i, test_case in enumerate(test_cases):
         try:
@@ -56,12 +54,20 @@ def run_tests():
             inputs = parse_input(test_case['input'])
             
             # Call user function with proper arguments
-            if hasattr(solution, '${functionName}'):
-                method = getattr(solution, '${functionName}')
-                result = method(*inputs)
+            if 'class Solution' in userCode:
+                # Class-based solution
+                solution = Solution()
+                if hasattr(solution, '${functionName}'):
+                    method = getattr(solution, '${functionName}')
+                    result = method(*inputs)
+                else:
+                    raise Exception(f'Method {functionName} not found in Solution class')
             else:
-                # Try calling as standalone function
-                result = ${functionName}(*inputs)
+                # Standalone function
+                if '${functionName}' in userCode:
+                    result = ${functionName}(*inputs)
+                else:
+                    raise Exception(f'Function {functionName} not found')
             
             # Convert result to string for comparison
             actual_output = format_output(result)
@@ -139,6 +145,11 @@ def format_output(result):
 
 if __name__ == "__main__":
     try:
+        # Create solution instance if it's a class-based solution
+        solution = None
+        if 'class Solution' in userCode:
+            solution = Solution()
+        
         results = run_tests()
         
         # Print results in a format the compiler can parse
@@ -171,12 +182,19 @@ if __name__ == "__main__":
     const { functionName, parameters } = functionTemplate;
     
     const testCode = `
+// User's solution code - they only write this part
 ${userCode}
 
-// Test case execution
+// Test case execution - hidden from user
 function runTests() {
     const testCases = ${JSON.stringify(testCases)};
     const results = [];
+    
+    // Create solution instance if it's a class-based solution
+    let solution = null;
+    if (userCode.includes('class Solution')) {
+        solution = new Solution();
+    }
     
     for (let i = 0; i < testCases.length; i++) {
         const testCase = testCases[i];
@@ -186,7 +204,9 @@ function runTests() {
             
             // Call user function
             let result;
-            if (typeof ${functionName} === 'function') {
+            if (solution && typeof solution.${functionName} === 'function') {
+                result = solution.${functionName}(...inputs);
+            } else if (typeof ${functionName} === 'function') {
                 result = ${functionName}(...inputs);
             } else {
                 throw new Error('Function ${functionName} not found');
@@ -308,8 +328,10 @@ try {
 import java.util.*;
 import java.util.stream.*;
 
+// User's solution code - they only write this part
 ${userCode}
 
+// Test case execution - hidden from user
 public class Main {
     public static void main(String[] args) {
         try {
@@ -422,8 +444,10 @@ public class Main {
 #include <sstream>
 using namespace std;
 
+// User's solution code - they only write this part
 ${userCode}
 
+// Test case execution - hidden from user
 struct TestCase {
     string input;
     string expectedOutput;
@@ -506,7 +530,9 @@ int main() {
       .replace('vector<', 'int* ')
       .replace('string', 'char*')
       .replace('cout <<', 'printf(')
-      .replace('<< endl', '\\n"');
+      .replace('<< endl', '\\n"')
+      .replace('// User\'s solution code - they only write this part', '// User\'s solution code - they only write this part')
+      .replace('// Test case execution - hidden from user', '// Test case execution - hidden from user');
   }
 
   /**
@@ -536,7 +562,22 @@ int main() {
     const match = code.match(functionRegex);
     
     if (!match) {
-      throw new Error('No function definition found in Python code');
+      // Try to find any function or method
+      const classMethodRegex = /def\s+(\w+)\s*\([^)]*\)/;
+      const classMatch = code.match(classMethodRegex);
+      if (classMatch) {
+        return {
+          functionName: classMatch[1],
+          parameters: [],
+          returnType: 'any'
+        };
+      }
+      // Default to 'solution' if no function found
+      return {
+        functionName: 'solution',
+        parameters: [],
+        returnType: 'any'
+      };
     }
     
     return {
@@ -551,7 +592,22 @@ int main() {
     const match = code.match(functionRegex);
     
     if (!match) {
-      throw new Error('No function definition found in JavaScript code');
+      // Try to find any function or method
+      const classMethodRegex = /(\w+)\s*\([^)]*\)\s*{/;
+      const classMatch = code.match(classMethodRegex);
+      if (classMatch) {
+        return {
+          functionName: classMatch[1],
+          parameters: [],
+          returnType: 'any'
+        };
+      }
+      // Default to 'solution' if no function found
+      return {
+        functionName: 'solution',
+        parameters: [],
+        returnType: 'any'
+      };
     }
     
     return {

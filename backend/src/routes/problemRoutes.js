@@ -13,6 +13,9 @@ const {
 } = require('../controllers/problemController');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 const { handleValidationErrors } = require('../middleware/validation');
+const GeminiService = require('../services/GeminiService');
+
+const geminiService = new GeminiService();
 
 // Public routes
 router.get('/', getProblems);
@@ -22,6 +25,53 @@ router.get('/:id', getProblemById);
 
 // Protected routes
 router.use(authenticateToken); // All routes after this require authentication
+
+// Run code endpoint (for testing code with custom input)
+router.post('/:id/run', async (req, res) => {
+  try {
+    const { code, language, input } = req.body;
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    if (!code || !language) {
+      return res.status(400).json({
+        success: false,
+        message: 'Code and language are required'
+      });
+    }
+
+    // Validate language
+    const supportedLanguages = ['python', 'javascript', 'java', 'cpp', 'c'];
+    if (!supportedLanguages.includes(language)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Unsupported language'
+      });
+    }
+
+    // Execute code using Gemini API
+    const result = await geminiService.runCode(code, language, input);
+
+    res.json({
+      success: true,
+      data: {
+        status: result.status,
+        output: result.output,
+        error: result.error,
+        executionTime: result.executionTime,
+        memoryUsed: result.memoryUsed
+      }
+    });
+
+  } catch (error) {
+    console.error('Run code error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to run code',
+      error: error.message
+    });
+  }
+});
 
 router.post('/:id/like', toggleProblemLike);
 

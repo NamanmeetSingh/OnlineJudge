@@ -96,12 +96,43 @@ const CodeEditor = ({ problem }) => {
   }, [problem, selectedLanguage, supportedLanguages]);
 
   const getDefaultCode = (language) => {
+    // If we have a problem with function signature, use it
+    if (problem?.functionSignature?.[language]) {
+      const signature = problem.functionSignature[language];
+      
+      switch (language) {
+        case 'python':
+          const pyParams = signature.parameters.join(', ');
+          return `def ${signature.functionName}(${pyParams}):\n    # Write your code here\n    pass`;
+        
+        case 'javascript':
+          const jsParams = signature.parameters.join(', ');
+          return `function ${signature.functionName}(${jsParams}) {\n    // Write your code here\n    \n}`;
+        
+        case 'cpp':
+          const cppParams = signature.parameters.join(', ');
+          return `#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    ${signature.returnType} ${signature.functionName}(${cppParams}) {\n        // Write your code here\n        return ${signature.returnType === 'int' ? '0' : signature.returnType === 'string' ? '""' : 'nullptr'};\n    }\n};`;
+        
+        case 'java':
+          const javaParams = signature.parameters.join(', ');
+          return `public class Solution {\n    public ${signature.returnType} ${signature.functionName}(${javaParams}) {\n        // Write your code here\n        return ${signature.returnType === 'int' ? '0' : signature.returnType === 'String' ? '""' : 'null'};\n    }\n}`;
+        
+        case 'c':
+          const cParams = signature.parameters.join(', ');
+          return `#include <stdio.h>\n\n${signature.returnType} ${signature.functionName}(${cParams}) {\n    // Write your code here\n    return ${signature.returnType === 'int' ? '0' : signature.returnType === 'char*' ? '""' : 'NULL'};\n}`;
+        
+        default:
+          return `// Write your code here for ${language}`;
+      }
+    }
+    
+    // Fallback to default templates if no function signature
     const defaultCodes = {
-      python: `def solution():\n    # Write your code here\n    pass\n\n# Test your solution\nif __name__ == "__main__":\n    result = solution()\n    print(result)`,
-      javascript: `function solution() {\n    // Write your code here\n    \n}\n\n// Test your solution\nconsole.log(solution());`,
-      cpp: `#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int solve() {\n        // Write your code here\n        return 0;\n    }\n};\n\nint main() {\n    Solution sol;\n    cout << sol.solve() << endl;\n    return 0;\n}`,
-      java: `public class Main {\n    public int solve() {\n        // Write your code here\n        return 0;\n    }\n    \n    public static void main(String[] args) {\n        Main sol = new Main();\n        System.out.println(sol.solve());\n    }\n}`,
-      c: `#include <stdio.h>\n\nint main() {\n    // Write your code here\n    printf("Hello World\\n");\n    return 0;\n}`
+      python: `def solution():\n    # Write your code here\n    pass`,
+      javascript: `function solution() {\n    // Write your code here\n    \n}`,
+      cpp: `#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int solve() {\n        // Write your code here\n        return 0;\n    }\n};`,
+      java: `public class Solution {\n    public int solve() {\n        // Write your code here\n        return 0;\n    }\n}`,
+      c: `#include <stdio.h>\n\nint solution() {\n    // Write your code here\n    return 0;\n}`
     };
     
     return defaultCodes[language] || `// Write your code here for ${language}`;
@@ -163,7 +194,7 @@ const CodeEditor = ({ problem }) => {
     try {
       let response;
       
-      if (executionMode === 'function' && problem?.functionSignature) {
+      if (executionMode === 'function' && problem?.functionSignature?.[selectedLanguage]) {
         // Use function-based execution (LeetCode style)
         response = await ApiService.executeFunctionCode({
           code,
@@ -184,14 +215,14 @@ const CodeEditor = ({ problem }) => {
             result.results.forEach((testResult, index) => {
               const status = testResult.passed ? '✅ PASS' : '❌ FAIL';
               outputText += `Test Case ${index + 1}: ${status}\n`;
-              if (!testResult.passed) {
-                outputText += `  Input: ${testResult.input}\n`;
-                outputText += `  Expected: ${testResult.expectedOutput}\n`;
-                outputText += `  Got: ${testResult.actualOutput}\n`;
-                if (testResult.error) {
-                  outputText += `  Error: ${testResult.error}\n`;
+                              if (!testResult.passed) {
+                  outputText += `  Input: ${testResult.input}\n`;
+                  outputText += `  Expected: ${testResult.expectedOutput}\n`;
+                  outputText += `  Got: ${testResult.actualOutput}\n`;
+                  if (testResult.error) {
+                    outputText += `  Error: ${testResult.error}\n`;
+                  }
                 }
-              }
               outputText += '\n';
             });
             
@@ -308,7 +339,7 @@ const CodeEditor = ({ problem }) => {
     try {
       let response;
       
-      if (executionMode === 'function' && problem?.functionSignature) {
+      if (executionMode === 'function' && problem?.functionSignature?.[selectedLanguage]) {
         // Use function-based submission (LeetCode style)
         response = await ApiService.submitFunctionSolution({
           code,
@@ -641,13 +672,40 @@ Only one valid answer exists.`}
 
         {/* Right Panel - Code Editor */}
         <div className="w-1/2 flex flex-col">
-          <div className="flex-1">
+          <div className="flex-1 flex flex-col">
+            {/* Function Signature Display */}
+            {executionMode === 'function' && problem?.functionSignature?.[selectedLanguage] && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-t-lg p-3">
+                <div className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">
+                  Function Signature:
+                </div>
+                <div className="font-mono text-sm text-blue-900 dark:text-blue-100">
+                  {(() => {
+                    const signature = problem.functionSignature[selectedLanguage];
+                    switch (selectedLanguage) {
+                      case 'python':
+                        return `def ${signature.functionName}(${signature.parameters.join(', ')}): -> ${signature.returnType}`;
+                      case 'javascript':
+                        return `function ${signature.functionName}(${signature.parameters.join(', ')}) -> ${signature.returnType}`;
+                      case 'cpp':
+                      case 'java':
+                        return `${signature.returnType} ${signature.functionName}(${signature.parameters.join(', ')})`;
+                      case 'c':
+                        return `${signature.returnType} ${signature.functionName}(${signature.parameters.join(', ')})`;
+                      default:
+                        return `${signature.functionName}(${signature.parameters.join(', ')}) -> ${signature.returnType}`;
+                    }
+                  })()}
+                </div>
+              </div>
+            )}
+            
             <Editor
-              height="60%"
-              language={selectedLanguage === 'cpp' ? 'cpp' : selectedLanguage}
-              theme={isDark ? 'vs-dark' : 'light'}
+              height="100%"
+              defaultLanguage={selectedLanguage}
               value={code}
-              onChange={(value) => setCode(value || '')}
+              onChange={setCode}
+              theme={isDark ? 'vs-dark' : 'light'}
               onMount={handleEditorDidMount}
               options={{
                 minimap: { enabled: false },
@@ -655,7 +713,10 @@ Only one valid answer exists.`}
                 lineNumbers: 'on',
                 roundedSelection: false,
                 scrollBeyondLastLine: false,
-                automaticLayout: true
+                automaticLayout: true,
+                wordWrap: 'on',
+                folding: true,
+                showFoldingControls: 'always'
               }}
             />
           </div>

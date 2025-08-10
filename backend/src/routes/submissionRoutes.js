@@ -1,21 +1,34 @@
 const express = require('express');
 const router = express.Router();
+const { authenticateToken } = require('../middleware/auth');
+const {
+  runCode,
+  submitSolution,
+  executeFunctionCode,
+  submitFunctionSolution,
+  getUserSubmissions,
+  getSubmissionDetails
+} = require('../controllers/submissionController');
 
-// TODO: Implement submission controllers and routes
-router.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Submissions endpoint - Coming soon!',
-    data: []
-  });
-});
+// All routes require authentication
+router.use(authenticateToken);
 
-router.post('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Submit code - Coming soon!',
-    data: null
-  });
-});
+// Run code with custom input
+router.post('/run', runCode);
+
+// Submit solution for evaluation
+router.post('/submit', submitSolution);
+
+// Execute function-based code (LeetCode style)
+router.post('/execute-function', executeFunctionCode);
+
+// Submit function-based solution
+router.post('/submit-function', submitFunctionSolution);
+
+// Get user submissions for a specific problem
+router.get('/problem/:problemId', getUserSubmissions);
+
+// Get submission details
+router.get('/:submissionId', getSubmissionDetails);
 
 module.exports = router;

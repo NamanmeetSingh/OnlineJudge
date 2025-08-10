@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : 'http://localhost:5000/api';
 
 class ApiService {
   constructor() {
@@ -192,7 +192,7 @@ class ApiService {
     return this.handleResponse(response);
   }
 
-  // Submissions endpoints (placeholder)
+  // Submissions endpoints
   async getSubmissions(params = {}) {
     const queryString = new URLSearchParams(params).toString();
     const response = await fetch(`${API_BASE_URL}/submissions?${queryString}`, {
@@ -238,7 +238,7 @@ class ApiService {
     const queryString = new URLSearchParams(params).toString();
     const response = await fetch(`${API_BASE_URL}/discussions?${queryString}`, {
       method: 'GET',
-      headers: this.getHeaders(false),
+      headers: this.getHeaders(),
     });
     
     return this.handleResponse(response);
@@ -247,35 +247,34 @@ class ApiService {
   async getDiscussionById(discussionId) {
     const response = await fetch(`${API_BASE_URL}/discussions/${discussionId}`, {
       method: 'GET',
-      headers: this.getHeaders(false),
+      headers: this.getHeaders(),
     });
     
     return this.handleResponse(response);
   }
 
-  // Compiler endpoints
+  // Gemini-based code execution endpoints
   async executeCode(codeData) {
-    const response = await fetch(`${API_BASE_URL}/compiler/execute`, {
+    const response = await fetch(`${API_BASE_URL}/problems/${codeData.problemId}/run`, {
       method: 'POST',
       headers: this.getHeaders(),
-      body: JSON.stringify(codeData),
+      body: JSON.stringify({
+        code: codeData.code,
+        language: codeData.language,
+        input: codeData.input
+      }),
     });
     
     return this.handleResponse(response);
   }
 
   async testSampleCases(testData) {
-    const response = await fetch(`${API_BASE_URL}/compiler/test-samples`, {
-      method: 'POST',
-      headers: this.getHeaders(),
-      body: JSON.stringify(testData),
-    });
-    
-    return this.handleResponse(response);
+    // This is now handled by executeFunctionCode for sample test cases
+    return this.executeFunctionCode(testData);
   }
 
   async submitSolution(submissionData) {
-    const response = await fetch(`${API_BASE_URL}/compiler/submit`, {
+    const response = await fetch(`${API_BASE_URL}/submissions/submit`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(submissionData),
@@ -285,17 +284,22 @@ class ApiService {
   }
 
   async getSupportedLanguages() {
-    const response = await fetch(`${API_BASE_URL}/compiler/languages`, {
-      method: 'GET',
-      headers: this.getHeaders(false),
-    });
-    
-    return this.handleResponse(response);
+    // Return supported languages directly since we're not using compiler service
+    return {
+      success: true,
+      data: [
+        { name: 'python', displayName: 'Python' },
+        { name: 'javascript', displayName: 'JavaScript' },
+        { name: 'java', displayName: 'Java' },
+        { name: 'cpp', displayName: 'C++' },
+        { name: 'c', displayName: 'C' }
+      ]
+    };
   }
 
   async getUserSubmissionsForProblem(problemId, params = {}) {
     const queryString = new URLSearchParams(params).toString();
-    const response = await fetch(`${API_BASE_URL}/compiler/submissions/${problemId}?${queryString}`, {
+    const response = await fetch(`${API_BASE_URL}/submissions/problem/${problemId}?${queryString}`, {
       method: 'GET',
       headers: this.getHeaders(),
     });
@@ -303,9 +307,9 @@ class ApiService {
     return this.handleResponse(response);
   }
 
-  // Function-based execution (LeetCode style)
+  // Function-based execution (LeetCode style) using Gemini API
   async executeFunctionCode(codeData) {
-    const response = await fetch(`${API_BASE_URL}/compiler/execute-function`, {
+    const response = await fetch(`${API_BASE_URL}/submissions/execute-function`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(codeData),
@@ -315,7 +319,7 @@ class ApiService {
   }
 
   async submitFunctionSolution(submissionData) {
-    const response = await fetch(`${API_BASE_URL}/compiler/submit-function`, {
+    const response = await fetch(`${API_BASE_URL}/submissions/submit-function`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(submissionData),
@@ -325,7 +329,7 @@ class ApiService {
   }
 
   async getSubmissionDetails(submissionId) {
-    const response = await fetch(`${API_BASE_URL}/compiler/submission/${submissionId}`, {
+    const response = await fetch(`${API_BASE_URL}/submissions/${submissionId}`, {
       method: 'GET',
       headers: this.getHeaders(),
     });

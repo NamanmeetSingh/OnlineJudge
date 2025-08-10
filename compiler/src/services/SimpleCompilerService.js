@@ -318,8 +318,16 @@ class SimpleCompilerService {
       this.logger.info(`Starting function-based solution submission: ${submissionId}`, {
         problemId,
         language,
-        testCasesCount: testCases.length
+        testCasesCount: testCases ? testCases.length : 0
       });
+
+      // If no test cases provided, create a simple one for testing
+      if (!testCases || testCases.length === 0) {
+        testCases = [{
+          input: '',
+          expectedOutput: 'test'
+        }];
+      }
 
       // Extract function template from user code
       const functionTemplate = this.functionWrapper.extractFunctionTemplate(code, language);
@@ -587,8 +595,10 @@ class SimpleCompilerService {
       // Write input if provided
       if (input) {
         process.stdin.write(input);
+        process.stdin.end();
+      } else {
+        process.stdin.end();
       }
-      process.stdin.end();
     });
   }
 

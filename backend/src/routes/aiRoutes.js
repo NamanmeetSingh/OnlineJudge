@@ -2,11 +2,13 @@ const express = require('express');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { authenticateToken } = require('../middleware/auth');
 const { validationResult, body } = require('express-validator');
+const GeminiService = require('../services/GeminiService');
 
 const router = express.Router();
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const geminiService = new GeminiService();
 
 // Validation middleware
 const aiAssistValidation = [
@@ -15,6 +17,31 @@ const aiAssistValidation = [
   body('problem').optional().isObject(),
   body('question').optional().isString()
 ];
+
+// Get AI service status
+router.get('/status', async (req, res) => {
+  try {
+    const status = geminiService.getServiceStatus();
+    
+    res.json({
+      success: true,
+      data: {
+        service: 'Gemini AI',
+        status: status.status,
+        apiKey: status.apiKey,
+        rateLimit: status.rateLimit,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('AI status check error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to check AI service status',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
 
 // Get AI code assistance
 router.post('/assist', authenticateToken, aiAssistValidation, async (req, res) => {
@@ -108,6 +135,8 @@ Please be constructive and educational in your response. If the code has issues,
       errorMessage = 'AI service configuration error';
     } else if (error.message && error.message.includes('quota')) {
       errorMessage = 'AI service quota exceeded';
+    } else if (error.message && error.message.includes('Rate limit')) {
+      errorMessage = 'Rate limit exceeded. Please try again in a minute.';
     }
 
     res.status(500).json({
